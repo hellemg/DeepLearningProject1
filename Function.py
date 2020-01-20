@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Function:
     def __init__(self):
         self.name = 'hei'
@@ -12,6 +13,7 @@ class Function:
         Return derivate of the value
         """
         raise NotImplementedError
+
 
 class ReLU(Function):
     def __init__(self):
@@ -26,6 +28,7 @@ class ReLU(Function):
     def apply_function(self, value):
         return np.maximum(0, value)
 
+
 class Linear(Function):
     def __init__(self):
         super().__init__()
@@ -35,6 +38,7 @@ class Linear(Function):
 
     def derivative(self, value):
         return 1
+
 
 class TanH(Function):
     def __init__(self):
@@ -46,23 +50,24 @@ class TanH(Function):
     def derivative(self, value):
         return (np.cosh(value))**(-2)
 
+
 class SoftMax(Function):
     def __init__(self):
         super().__init__()
 
     def apply_function(self, value):
         # Stable softmax to avoid NaN-problems
-        exps = np.exp(value - np.max(value)
-        return exps / np.sum(exps)
+        exps = np.exp(value - np.max(value))
+        return exps/np.sum(exps)
 
     def derivative(self, value):
         # https://deepnotes.io/softmax-crossentropy
         raise NotImplementedError
-    
+
 
 class L2:
     def __init__(self, activation):
-        self.activation = activation
+        self.activation=activation
 
     def get_delta_w(self, label_value, estimated_value, x, z):
         return -1*np.sum((label_values - estimated_values)*x*self.activation.derivative(z))
