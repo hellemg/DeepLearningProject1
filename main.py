@@ -2,6 +2,8 @@ import configparser
 import numpy as np
 import csv
 
+from FileReader import *
+
 """
 The following imports are OK, and not anything else: numpy, matplotlib.pyplot, configparser, enum,
 sys and softmax from scipy.special. Notice that tanh is available from numpy.
@@ -14,13 +16,10 @@ if __name__ == '__main__':
         2: 'Create config',
         3: 'Read config',
         4: 'Transform data'
-    }[4]
+    }[3]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
-        config = configparser.ConfigParser()
-        config.read('config.txt')
-        config.sections()
 
     elif Menu == 'Diamond Board':
         print('Welcome to AI programming project 1 :)')
@@ -42,36 +41,10 @@ if __name__ == '__main__':
 
     elif Menu == 'Read config':
         print('Reading config file...')
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        print(config.sections())
-
-        for section in config.sections():
-            print('---'+section)
-            for key in config[section]:
-                print(key, config[section][key])
-
-        # Data
-        train_path = config['DATA']['training']
-        dev_path = config['DATA']['validation']
-
-        # Model
-        # Read config-value, split into list based on comma, and remove whitespace and cast to int
-        layers = config['MODEL']['layers'].split(',')
-        layers = [int(x.strip(' ')) for x in layers]
-        # TODO: if layers[0] == 0, no hidden layers
-        activations = config['MODEL']['activations']
-        loss_type = config['MODEL']['loss_type']
-        """ TODO:
-        Note that in
-        addition to the mentioned functions, you will also need to handle the softmax as part of your
-        implementation to handle the classification-loss (see below).
-        """
-
-        # HYPER
-        learning_rate = config['HYPER']['learning_rate']
-        no_epochs = config['HYPER']['no_epochs']
-        L2_regularization = config['HYPER']['L2_regularization']
+        FileReader = FileReader()
+        FileReader.get_config_parameters('config.ini')
+        print('... parameters are set')
+        print('Loss type:', FileReader.loss_type)
 
     elif Menu == 'Transform data':
         print('Transforming data...')
