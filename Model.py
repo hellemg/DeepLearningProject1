@@ -1,19 +1,24 @@
+from Function import *
 import numpy as np
 
+
 class Model:
-    def __init__(self):
+    def __init__(self, learning_rate, loss_type):
         self.layers = []
+        self.Function = Function()
+        self.learning_rate = learning_rate
+        self.loss_type = loss_type
         #self.activations = activations
         self.loss_type = None
         self.weights = None
         self.architecture = None
 
-    def train(self, data, labels, epochs):
-        raise NotImplementedError
-
     def add_layer(self, no_nodes, activation, input_dim):
         weights = self.get_weights(no_nodes, input_dim)
-        self.layers.append([weights, np.zeros((no_nodes, 1)), activation, input_dim])
+        self.layers.append({'weights': weights,
+                            'nodes': np.zeros((no_nodes, 1)),
+                            'activation': activation,
+                            'input_dim': input_dim})
 
     def compile(self, learning_rate, loss_type):
         self.loss_type = loss_type
@@ -30,19 +35,26 @@ class Model:
         np.random.seed(42)
         return (np.random.rand(input_dim, no_nodes)).transpose()
 
+    def train(self, data, labels, epochs):
+        # Run FP, BP for each epoch
+        for e in epochs:
+            self.forward_propagation(data)
+            estimated_values=self.layer[-1]['nodes']
+            for i, layer in reversed(enumerate(self.layers)):
+                # Get the activation-funtion-loss for this layer
+                self.layers[i]['activation']
+                delta_weights = self.loss_type.get_delta_w(labels, estimated_values, x, z)
+                self.layers[i]['weights'] -= self.learning_rate#*'dE_i/dw_ij'
+
     def forward_propagation(self, x_train):
         print('... forward propagation')
         prev_x = x_train
         for i, layer in enumerate(self.layers):
             print(layer)
-            W_T = layer[0]
-            x = layer[1]
-            activation = layer[2]
-            z = np.matmul(W_T, prev_x)
-            self.layers[i][1] = activation.do_the_math(z)
+            z = np.matmul(layer['weights'], prev_x)
+            self.layers[i]['nodes'] = layer['activation'].apply_function(z)
             print(layer)
-            prev_x = x
-
+            prev_x = layer['nodes']
 
     """ 
     After setting up file-reader and parser for the config-file, the first task is to build a simple neural

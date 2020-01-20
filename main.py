@@ -24,9 +24,7 @@ if __name__ == '__main__':
     elif Menu == 'Simple nn':
         print('Simple NN...')
         activation = ReLU()
-        print(activation.do_the_math(-10))
-        print(activation.do_the_math(3))
-        model = Model()
+        model = Model(0.1, 'L2')
         model.add_layer(2, activation, 3)
         model.forward_propagation(np.array([[1], [2], [3]]))
 
