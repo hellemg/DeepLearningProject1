@@ -47,3 +47,21 @@ class FileReader:
         self.learning_rate = self.config['HYPER']['learning_rate']
         self.no_epochs = self.config['HYPER']['no_epochs']
         self.L2_regularization = self.config['HYPER']['L2_regularization']
+
+    def read_dataset(self, path):
+        """
+        input: string, path for dataset to read
+        returns:
+        numpy array of shape no_examples x no_features, examples from dataset
+        numpy array of shape no_examples x 1, labels from dataset
+        """
+        print('loading dataset from '+path)
+        x = []
+        y = []
+        with open(path) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                x.append([int(float(x)) for x in row[:-1]])
+                y.append(int(float(row[-1])))
+        print('...dataset is loaded')
+        return np.array(x), np.array(y)

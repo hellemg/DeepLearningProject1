@@ -50,22 +50,6 @@ if __name__ == '__main__':
         print('Transforming data...')
         path = './DATA/train_small.csv'
 
-        def read_dataset(path):
-            """
-            input: string, path for dataset to read
-            returns:
-            numpy array of shape no_examples x no_features, examples from dataset
-            numpy array of shape no_examples x 1, labels from dataset
-            """
-            x = []
-            y = []
-            with open(path) as csv_file:
-                csv_reader = csv.reader(csv_file, delimiter=',')
-                for row in csv_reader:
-                    x.append([int(float(x)) for x in row[:-1]])
-                    y.append(int(float(row[-1])))
-            return np.array(x), np.array(y)
-
         def one_hot_encode(no_examples, no_classes, labels):
             """
             input:
