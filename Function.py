@@ -1,3 +1,5 @@
+import numpy as np
+
 class Function:
     def __init__(self):
         self.name = 'hei'
@@ -22,5 +24,5 @@ class ReLU(Function):
             return 1
 
     def do_the_math(self, value):
-        return max(0, value)
+        return np.maximum(0, value)
 

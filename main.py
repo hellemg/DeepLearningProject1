@@ -2,6 +2,8 @@ import configparser
 import numpy as np
 
 from Preprocess import *
+from Function import *
+from Model import *
 
 """
 The following imports are OK, and not anything else: numpy, matplotlib.pyplot, configparser, enum,
@@ -11,17 +13,22 @@ sys and softmax from scipy.special. Notice that tanh is available from numpy.
 if __name__ == '__main__':
     Menu = {
         -1: 'Testspace',
-        1: 'Run',
+        1: 'Simple nn',
         2: 'Create config',
         3: 'Preprocess',
-    }[3]
+    }[1]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
 
-    elif Menu == 'Diamond Board':
-        print('Welcome to AI programming project 1 :)')
-        print('Running program...')
+    elif Menu == 'Simple nn':
+        print('Simple NN...')
+        activation = ReLU()
+        print(activation.do_the_math(-10))
+        print(activation.do_the_math(3))
+        model = Model()
+        model.add_layer(2, activation, 3)
+        model.forward_propagation(np.array([[1], [2], [3]]))
 
     elif Menu == 'Create config':
         print('Creating config...')
