@@ -1,7 +1,8 @@
 import configparser
+import csv
+import numpy as np
 
-
-class FileReader:
+class Preprocess:
     def __init__(self):
         self.config = configparser.ConfigParser()
         # Data
@@ -18,13 +19,6 @@ class FileReader:
 
     def get_config_parameters(self, path, debug=False):
         self.config.read(path)
-        if debug:
-            print('Sections in config:')
-            for section in self.config.sections():
-                print('-'+section)
-                for key in self.config[section]:
-                    print('--'+key)
-                    print('----'+self.config[section][key])
 
         # Data
         self.train_path = self.config['DATA']['training']
@@ -47,6 +41,14 @@ class FileReader:
         self.learning_rate = self.config['HYPER']['learning_rate']
         self.no_epochs = self.config['HYPER']['no_epochs']
         self.L2_regularization = self.config['HYPER']['L2_regularization']
+        print('... parameters are set')
+        if debug:
+            print('Sections in config:')
+            for section in self.config.sections():
+                print('-'+section)
+                for key in self.config[section]:
+                    print('--'+key)
+                    print('----'+self.config[section][key])
 
     def read_dataset(self, path):
         """
@@ -55,7 +57,6 @@ class FileReader:
         numpy array of shape no_examples x no_features, examples from dataset
         numpy array of shape no_examples x 1, labels from dataset
         """
-        print('loading dataset from '+path)
         x = []
         y = []
         with open(path) as csv_file:
@@ -63,5 +64,20 @@ class FileReader:
             for row in csv_reader:
                 x.append([int(float(x)) for x in row[:-1]])
                 y.append(int(float(row[-1])))
-        print('...dataset is loaded')
+        print('... dataset is loaded from'+path)
         return np.array(x), np.array(y)
+
+    def one_hot_encode(self, no_examples, no_classes, labels):
+        """
+        input:
+        no_examples: int, number of examples
+        no_classes: int, number of classes
+        labels: numpy array of shape no_examples with ints, labels to encode
+        returns:
+        numpy array of shape no_examples, no_classes, one hot encoded label for each examples
+        """
+        one_hot = np.zeros((no_examples, no_classes))
+        # Uses the i'th entry in each array at the same time
+        one_hot[np.arange(no_examples), labels] = 1
+        print('... labels are onehot encoded')
+        return one_hot

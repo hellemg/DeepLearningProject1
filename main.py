@@ -1,8 +1,7 @@
 import configparser
 import numpy as np
-import csv
 
-from FileReader import *
+from Preprocess import *
 
 """
 The following imports are OK, and not anything else: numpy, matplotlib.pyplot, configparser, enum,
@@ -14,8 +13,7 @@ if __name__ == '__main__':
         -1: 'Testspace',
         1: 'Run',
         2: 'Create config',
-        3: 'Read config',
-        4: 'Transform data'
+        3: 'Preprocess',
     }[3]
 
     if Menu == 'Testspace':
@@ -39,32 +37,13 @@ if __name__ == '__main__':
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
-    elif Menu == 'Read config':
+    elif Menu == 'Preprocess':
         print('Reading config file...')
-        FileReader = FileReader()
-        FileReader.get_config_parameters('config.ini')
-        print('... parameters are set')
-        print('Loss type:', FileReader.loss_type)
+        Preprocess = Preprocess()
+        Preprocess.get_config_parameters('config.ini')
 
-    elif Menu == 'Transform data':
-        print('Transforming data...')
         path = './DATA/train_small.csv'
-
-        def one_hot_encode(no_examples, no_classes, labels):
-            """
-            input:
-            no_examples: int, number of examples
-            no_classes: int, number of classes
-            labels: numpy array of shape no_examples with ints, labels to encode
-            returns:
-            numpy array of shape no_examples, no_classes, one hot encoded label for each examples
-            """
-            one_hot = np.zeros((no_examples, no_classes))
-            # Uses the i'th entry in each array at the same time
-            one_hot[np.arange(no_examples), y_train] = 1
-            return one_hot
-
-        x_train, y_train = read_dataset(path)
+        x_train, y_train = Preprocess.read_dataset(path)
         no_examples = len(y_train)
         no_classes = max(y_train) + 1
-        one_hot = one_hot_encode(no_examples, no_classes, y_train)
+        one_hot = Preprocess.one_hot_encode(no_examples, no_classes, y_train)
