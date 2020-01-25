@@ -39,14 +39,21 @@ class Model:
         for e in range(epochs):
             self.forward_propagation(inputs)
             print(self.layers)
+            print(inputs.shape)
+            return
             print('... backpropagation')
-            estimated_values=self.layers[-1]['nodes']
+            estimated_values = self.layers[-1]['nodes']
+            assert estimated_values.shape == targets.shape
             output_errors = estimated_values - targets
-            print(output_errors)
+            if np.sum(output_errors) < 0.0000002:
+                print('stop training on round',e,'loss is', output_errors)
+                return
+            print('loss:', output_errors)
             error_change = inputs*output_errors
             print(error_change)
-            self.layers[0]['weights'] -= self.learning_rate*np.transpose(error_change)
-            print(self.layers[0]['weights'])
+            self.layers[0]['weights'] -= self.learning_rate * \
+                np.transpose(error_change)
+            print('new weights:', self.layers[0]['weights'])
 
     def forward_propagation(self, x_train):
         print('... forward propagation')
