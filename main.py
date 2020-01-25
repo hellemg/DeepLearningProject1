@@ -24,9 +24,11 @@ if __name__ == '__main__':
     elif Menu == 'Simple nn':
         print('Simple NN...')
         activation = ReLU()
-        model = Model(0.1, 'L2')
-        model.add_layer(2, activation, 3)
-        model.forward_propagation(np.array([[1], [2], [3]]))
+        loss = L2(activation)
+        model = Model(learning_rate=0.1, loss_type = loss)
+        model.add_layer(1, activation, 2)
+        #model.forward_propagation(np.array([[1], [1]]))
+        model.train(np.array([[1], [0]]), np.array([[1]]), 10)
 
     elif Menu == 'Create config':
         print('Creating config...')

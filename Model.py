@@ -9,7 +9,6 @@ class Model:
         self.learning_rate = learning_rate
         self.loss_type = loss_type
         #self.activations = activations
-        self.loss_type = None
         self.weights = None
         self.architecture = None
 
@@ -35,25 +34,26 @@ class Model:
         np.random.seed(42)
         return (np.random.rand(input_dim, no_nodes)).transpose()
 
-    def train(self, data, labels, epochs):
+    def train(self, inputs, targets, epochs):
         # Run FP, BP for each epoch
-        for e in epochs:
-            self.forward_propagation(data)
-            estimated_values=self.layer[-1]['nodes']
-            for i, layer in reversed(enumerate(self.layers)):
-                # Get the activation-funtion-loss for this layer
-                self.layers[i]['activation']
-                delta_weights = self.loss_type.get_delta_w(labels, estimated_values, x, z)
-                self.layers[i]['weights'] -= self.learning_rate#*'dE_i/dw_ij'
+        for e in range(epochs):
+            self.forward_propagation(inputs)
+            print(self.layers)
+            print('... backpropagation')
+            estimated_values=self.layers[-1]['nodes']
+            output_errors = estimated_values - targets
+            print(output_errors)
+            error_change = inputs*output_errors
+            print(error_change)
+            self.layers[0]['weights'] -= self.learning_rate*np.transpose(error_change)
+            print(self.layers[0]['weights'])
 
     def forward_propagation(self, x_train):
         print('... forward propagation')
         prev_x = x_train
         for i, layer in enumerate(self.layers):
-            print(layer)
             z = np.matmul(layer['weights'], prev_x)
             self.layers[i]['nodes'] = layer['activation'].apply_function(z)
-            print(layer)
             prev_x = layer['nodes']
 
     """ 

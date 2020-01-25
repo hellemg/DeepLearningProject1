@@ -20,10 +20,7 @@ class ReLU(Function):
         super().__init__()
 
     def derivative(self, value):
-        if value <= 0:
-            return 0
-        else:
-            return 1
+        return 1*(value>0)
 
     def apply_function(self, value):
         return np.maximum(0, value)
@@ -69,5 +66,5 @@ class L2:
     def __init__(self, activation):
         self.activation=activation
 
-    def get_delta_w(self, label_value, estimated_value, x, z):
-        return -1*np.sum((label_values - estimated_values)*x*self.activation.derivative(z))
+    def nodes_error_in_layer(self, weights_transposed, error_in_next_layer, z):
+        return weights_transposed*error_in_next_layer*self.activation.derivative(z)
