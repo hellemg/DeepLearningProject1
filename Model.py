@@ -55,6 +55,42 @@ class Model:
                 np.transpose(error_change)
             print('new weights:', self.layers[0]['weights'])
 
+    def jacobian_iteration(self):
+        # Size of output layer TODO: check 0 or 1 index
+        output_size = self.layers[-1]['weights'].shape[0]
+        estimated_values = self.layers[-1]['nodes']
+        J_output_layer_by_sum = self.layers[-1]['activation'].derivative(estimated_values)
+        R = np.multiply(np.identity(output_size), J_output_layer_by_sum)
+        # Add stuff for softmax
+
+        # NOT JUST FOR FIRST WEIGHTS; BUT ITERATIVE
+        # TODO: Rename 'weights' to 'weights_transposed'
+        J_layer_by_earlier_layer = J_output_layer_by_sum @ self.layers[-1]['weights']
+        earlier_layer = self.layers[-2]['nodes']
+        J_layer_by_incoming_weights_simplified = np.outer(earlier_layer, J_output_layer_by_sum)
+        print('Shape of J_Z_by_W_simplified should be len(y) times len(z):', J_layer_by_incoming_weights_simplified.shape)
+        for layer in reversed(self.layers):
+            R = R @ J_layer_by_earlier_layer
+            # Check shape
+            # Break before input, maybe not needed?
+        # Get J_first_layer_by_first_weights
+        J_loss_by_first_weights = 3 #R @ J_first_layer_by_first_weights
+        # Update first weights
+
+
+        # Diagonal matrix with output derivatives (slide 48, lecture 2)
+        # TODO: Get jacobian of Loss by Z (output)
+        # TODO: Get jacobian of Z by W: J_layer_by_incoming_weights_simplified
+        # TODO: Get Jacobian of Loss by W (weights from Y to Z) from the two above. See slides 52 for numpy
+        # TODO: Update W with the above
+
+        # TODO: Get jacobian of Z by Y
+        # TODO: Get jacobian of L by Y, continue iteration
+
+        # TODO: Get Y, output from layer Y (vector [y1, y2, ..., ,n])
+        # TODO: Y op diag(R) (op = outer product. slide 50)
+
+
     def forward_propagation(self, x_train):
         print('... forward propagation')
         prev_x = x_train
