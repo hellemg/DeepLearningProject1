@@ -4,7 +4,7 @@ import numpy as np
 
 class Model:
     def __init__(self, learning_rate, loss_type):
-        self.layers = []
+        self.layers = [[]]
         self.learning_rate = learning_rate
         self.loss_type = loss_type
 
@@ -29,12 +29,12 @@ class Model:
             print('activation', layer['activation'])
             print('input dim', layer['input_dim'])
 
-    def train(self, inputs, targets, epochs=100):
+    def train(self, inputs, targets, epochs=1):
         # Add layer for inputs-nodes
-        self.layers.insert(0, {'weights_transposed': None,
+        self.layers[0] = {'weights_transposed': None,
                                'nodes': inputs,
                                'activation': None,
-                               'input_dim': None})
+                               'input_dim': None}
         # Run FP, BP for each epoch
         for e in range(epochs):
             self.forward_propagation()
