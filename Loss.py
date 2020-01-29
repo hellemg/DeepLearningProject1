@@ -33,7 +33,7 @@ class CrossEntropy:
 
     def gradient(self, y, s):
         """
-        Return the gradient of cross-entropy of vectors y (target) and z (prediction)
+        Return the gradient of cross-entropy of vectors y (target) and s (prediction after softmax)
 
         :type y: ndarray
         :param y: one-hot vector encoding correct class

@@ -29,6 +29,26 @@ class Model:
             print('activation', layer['activation'])
             print('input dim', layer['input_dim'])
 
+    def fit(self, inputs, targets, epochs=100):
+        for e in range(epochs):
+            for ex in range(inputs.shape[1]):
+                input_ex = inputs[:, ex]
+                print(inputs[:, ex])
+                print(targets[0, :])
+                # Add layer for inputs-nodes
+                self.layers[0] = {'weights_transposed': None,
+                                  'nodes': input_ex,
+                                  'activation': None,
+                                  'input_dim': None}
+                # Run FP, BP for each epoch
+                self.forward_propagation()
+                self.print_layers()
+                prev_output_error = self.backpropagation(targets[ex,:])
+                if np.abs(prev_output_error) < 0.0000002:
+                    print('stop training on round', e,
+                          'loss is', prev_output_error)
+                    return
+
     def train(self, inputs, targets, epochs=100):
         # Add layer for inputs-nodes
         self.layers[0] = {'weights_transposed': None,
@@ -55,6 +75,8 @@ class Model:
         print('loss:', output_errors)
         # Change in loss by change in output layer (L by Z)
         J_loss_by_layer = self.loss_type.gradient(targets, output_values)
+        print(J_loss_by_layer)
+        print(targets)
         if softmax_model:
             # TODO: Add J_loss_by_softmax
             J_loss_by_softmax = 3
@@ -67,7 +89,9 @@ class Model:
         for i, layer in enumerate(reversed(self.layers[1:])):
             # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
             J_layer_by_sum = layer['activation'].gradient(layer['nodes'])
+            print(J_layer_by_sum)
             J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
+            print(J_layer_by_earlier_layer)
             J_loss_by_earlier_layer = J_loss_by_layer @ J_layer_by_earlier_layer
 
             J_layer_by_weights = np.outer(

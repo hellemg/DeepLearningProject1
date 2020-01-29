@@ -38,17 +38,28 @@ if __name__ == '__main__':
         model = Model(learning_rate=0.05, loss_type=loss_type)
         model.add_layer(1, activation, input_dim=2)
         # Training examples, one per row
-        X = np.array([[0, 0],
+        """ X = np.array([[0, 0],
                       [0, 1],
                       [1, 0],
                       [1, 1]])
-        Y = [[0], [1], [1], [1]]
+        X = np.array([[1], [1]])
+        Y = np.array([[1]])
+        """
+        Y = np.array([[0], [1], [1], [1]])
+        X = np.array([[0, 0, 1, 1], [0, 1, 0, 1]])
         # Add x0 = 1 for the biases
         #ones = np.ones((X.shape[0], 1))
         #X = np.concatenate((ones, X), axis=1)
         #model.forward_propagation(np.array([[1], [1]]))
-        model.train(np.array([[1], [1]]), np.array([[1]]))
-        
+        """
+        Training examples usually are given as no_examples x no_features,
+        slides says the opposite. no_features, no_examples, batch_size - find out all shapes
+        Get help with the shapes of the Jacobians, go through each and write down what is needed
+        Bias: should be affected by weights, but the slides don't have incoming weights on them?
+        Regularization: explain
+        """
+        model.fit(X, Y)
+
     elif Menu == 'Create config':
         print('Creating config...')
         config = configparser.ConfigParser()
