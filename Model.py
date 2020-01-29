@@ -8,13 +8,12 @@ class Model:
         self.learning_rate = learning_rate
         self.loss_type = loss_type
 
-    def add_layer(self, no_nodes, activation, input_dim, batch_size):
+    def add_layer(self, no_nodes, activation, input_dim):
         weights = self.get_weights(no_nodes, input_dim)
         self.layers.append({'weights_transposed': weights,
-                            'nodes': np.zeros((batch_size, no_nodes)),
+                            'nodes': np.zeros((no_nodes, 1)),
                             'activation': activation,
                             'input_dim': input_dim})
-        # TODO: Add gradients that keep weight-changes for each layer. Average at the end of each epoch
 
     def get_weights(self, no_nodes, input_dim):
         """
@@ -30,15 +29,14 @@ class Model:
             print('activation', layer['activation'])
             print('input dim', layer['input_dim'])
 
-    def train(self, inputs, targets, epochs=1):
+    def train(self, inputs, targets, epochs=100):
         # Add layer for inputs-nodes
         self.layers[0] = {'weights_transposed': None,
-                          'nodes': inputs.T,
+                          'nodes': inputs,
                           'activation': None,
                           'input_dim': None}
         # Run FP, BP for each epoch
         for e in range(epochs):
-            self.print_layers()
             self.forward_propagation()
             self.print_layers()
             prev_output_error = self.backpropagation(targets)
@@ -69,10 +67,6 @@ class Model:
         for i, layer in enumerate(reversed(self.layers[1:])):
             # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
             J_layer_by_sum = layer['activation'].gradient(layer['nodes'])
-            print(J_layer_by_sum)
-            print(J_layer_by_sum.shape)
-            print(layer['weights_transposed'])
-            print(layer['weights_transposed'].shape)
             J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
             J_loss_by_earlier_layer = J_loss_by_layer @ J_layer_by_earlier_layer
 
