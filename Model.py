@@ -22,7 +22,7 @@ class Model:
         np.random.seed(42)
         return np.random.normal(0, 1/(np.sqrt(input_dim)), (input_dim, no_nodes)).transpose()
 
-    def print_layers():
+    def print_layers(self):
         for layer in self.layers:
             print('weights:', layer['weights_transposed'])
             print('nodes', layer['nodes'])
