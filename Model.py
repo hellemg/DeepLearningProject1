@@ -48,29 +48,29 @@ class Model:
             print('new weights:', self.layers[0]['weights_transposed'])
 
     def jacobian_iteration(self, soft_max_model):
-        # Size of output layer, check 0 or 1 index
-        # output_size = self.layers[-1]['weights'].shape[0]
-        estimated_values = self.layers[-1]['nodes']
-
-        J_output_layer_by_sum = self.layers[-1]['activation'].derivative(estimated_values)
+        # Values estimated by NN
+        output_values = self.layers[-1]['nodes']
+        # Effect of input to layer on output of layer ()
+        J_output_layer_by_sum = self.layers[-1]['activation'].derivative(output_values)
         # R = np.multiply(np.identity(output_size), J_output_layer_by_sum)
 
         # NOT JUST FOR FIRST WEIGHTS; BUT ITERATIVE
-        # TODO: Rename 'weights' to 'weights_transposed'
-        # Change in loss by change of output values (L by Z)
-        J_loss_by_output = self.loss_type.derivative(estimated_values)
+        
         # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
         J_layer_by_earlier_layer = J_output_layer_by_sum @ self.layers[-1]['weights_transposed']
         # Values of previours layer (Y)
         earlier_layer = self.layers[-2]['nodes']
         J_layer_by_incoming_weights_simplified = np.outer(earlier_layer, J_output_layer_by_sum)
-        print('Shape of J_Z_by_W_simplified should be len(y) times len(z):', J_layer_by_incoming_weights_simplified.shape)
+        # Change in loss by change of output values (L by Z)
+        J_loss_by_output = self.loss_type.gradient(output_values)
         # Initialize before iteration
         J_loss_by_layer = J_loss_by_output
         if soft_max_model:
-                
-            # TODO: Add stuff for softmax
-            # j_s_z is softmax jacobian(z)
+            # Get softmax jacobian of outputvalues z (S by Z)
+            J_softmax_by_output = self.layers[-1]['activation'].jacobian(output_values)
+            # Add softmax-layer to jacobi-iteration (L by Z, S between)
+            J_loss_by_output = J_loss_by_softmax @ J_softmax_by_output
+        # Jacobi-iteration
         for i, layer in enumerate(reversed(self.layers)):
             # Calculate values for updating weights
             J_loss_by_input_weights = J_loss_by_layer * J_layer_by_incoming_weights_simplified
@@ -81,8 +81,7 @@ class Model:
             input_sum_to_layer = layer['weights'] @ self.layers[len(self.layers) - 1 - i]['nodes']
             J_layer_by_sum = layer['activation'].derivative(input_sum_to_layer)
             J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
-            # Check shape
-            # Break before input, maybe not needed? No, but add layer for input-values
+            # TODO: Stop iteration before first layer
 
         # Diagonal matrix with output derivatives (slide 48, lecture 2)
         # TODO: Update W with new weights
