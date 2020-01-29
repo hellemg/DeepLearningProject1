@@ -11,6 +11,7 @@ class Model:
     def add_layer(self, no_nodes, activation, input_dim):
         weights = self.get_weights(no_nodes, input_dim)
         self.layers.append({'weights_transposed': weights,
+                            'zs': None,
                             'nodes': np.zeros((no_nodes, 1)),
                             'activation': activation,
                             'input_dim': input_dim})
@@ -49,7 +50,7 @@ class Model:
                           'loss is', prev_output_error)
                     return
 
-    def train(self, inputs, targets, epochs=100):
+    def train(self, inputs, targets, epochs=1000):
         # Add layer for inputs-nodes
         self.layers[0] = {'weights_transposed': None,
                           'nodes': inputs,
@@ -65,7 +66,7 @@ class Model:
                       'loss is', prev_output_error)
                 return
 
-    def backpropagation(self, targets, softmax_model=False):
+    def backpropagation(self, targets, softmax_model=True):
         print('... backpropagation')
         output_values = self.layers[-1]['nodes']
         #assert output_values.shape == targets.shape
@@ -73,27 +74,24 @@ class Model:
         output_errors = self.loss_type.apply_function(
             targets, output_values)
         print('loss:', output_errors)
-        # Change in loss by change in output layer (L by Z)
+        # Change in loss by change in output layer (L by Z, L by S for softmax)
         J_loss_by_layer = self.loss_type.gradient(targets, output_values)
-        print(J_loss_by_layer)
-        print(targets)
         if softmax_model:
-            # TODO: Add J_loss_by_softmax
-            J_loss_by_softmax = 3
             # Get softmax jacobian of output values z (S by Z)
             J_softmax_by_output = self.layers[-1]['activation'].jacobian(
                 output_values)
             # Add softmax-layer to jacobi-iteration (L by Z, S between)
-            J_loss_by_layer = J_loss_by_softmax @ J_softmax_by_output
+            J_loss_by_layer = J_loss_by_layer @ J_softmax_by_output
         # For all but first layer (first layer only have inputs)
         for i, layer in enumerate(reversed(self.layers[1:])):
             # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
             J_layer_by_sum = layer['activation'].gradient(layer['nodes'])
+            """ 
             print(J_layer_by_sum)
             J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
             print(J_layer_by_earlier_layer)
             J_loss_by_earlier_layer = J_loss_by_layer @ J_layer_by_earlier_layer
-
+            """
             J_layer_by_weights = np.outer(
                 self.layers[len(self.layers) - i - 1]['nodes'], np.diag(J_layer_by_sum))
             J_loss_by_weigths = J_loss_by_layer * J_layer_by_weights
@@ -106,7 +104,9 @@ class Model:
             #print('Z by W: {}'.format(J_layer_by_weights))
             #print('L by W: {}'.format(J_loss_by_weigths))
             # Update for the next round
+            """
             J_loss_by_layer = J_loss_by_earlier_layer
+            """
         return output_errors
 
     def forward_propagation(self):
@@ -114,4 +114,5 @@ class Model:
         for i, layer in enumerate(self.layers[1:]):
             # Index with i, which is 0 when we are at layer 1
             z = np.matmul(layer['weights_transposed'], self.layers[i]['nodes'])
+            layer['zs'] = z
             layer['nodes'] = layer['activation'].apply_function(z)

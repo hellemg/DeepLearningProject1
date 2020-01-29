@@ -32,21 +32,21 @@ if __name__ == '__main__':
         Preprocess = Preprocess()
         Preprocess.get_config_parameters('config.ini')
         # Get activation and loss classes
-        activation = Preprocess.get_activation('relu')
-        loss_type = Preprocess.get_loss_type('L2')
+        activation = Preprocess.get_activation('softmax')
+        loss_type = Preprocess.get_loss_type('cross_entropy')
 
-        model = Model(learning_rate=0.05, loss_type=loss_type)
-        model.add_layer(1, activation, input_dim=2)
+        model = Model(learning_rate=0.1, loss_type=loss_type)
+        model.add_layer(2, activation, input_dim=2)
         # Training examples, one per row
         """ X = np.array([[0, 0],
                       [0, 1],
                       [1, 0],
                       [1, 1]])
-        X = np.array([[1], [1]])
-        Y = np.array([[1]])
-        """
         Y = np.array([[0], [1], [1], [1]])
         X = np.array([[0, 0, 1, 1], [0, 1, 0, 1]])
+        """
+        X = np.array([[1], [1]])
+        Y = np.array([[0.5], [0.5]])
         # Add x0 = 1 for the biases
         #ones = np.ones((X.shape[0], 1))
         #X = np.concatenate((ones, X), axis=1)
