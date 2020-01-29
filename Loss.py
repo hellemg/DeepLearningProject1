@@ -62,8 +62,8 @@ class L2:
 
         :returns: scalar cost
         """
-        # TODO: Is this going to be for more than one output-neuron?
-        return ((y-z)**2)/2
+        output_size = len(z)
+        return np.sum((y-z)**2)/output_size
 
     def gradient(self, y, z):
         """
@@ -77,4 +77,5 @@ class L2:
 
         :returns: ndarray of size len(y) (same as len(z))
         """
-        return y - z
+        output_size = len(z)
+        return 2*(y - z)/output_size

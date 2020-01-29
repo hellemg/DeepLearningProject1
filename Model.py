@@ -47,7 +47,7 @@ class Model:
                 np.transpose(error_change)
             print('new weights:', self.layers[0]['weights_transposed'])
 
-    def jacobian_iteration(self):
+    def jacobian_iteration(self, soft_max_model):
         # Size of output layer, check 0 or 1 index
         # output_size = self.layers[-1]['weights'].shape[0]
         estimated_values = self.layers[-1]['nodes']
@@ -67,8 +67,10 @@ class Model:
         print('Shape of J_Z_by_W_simplified should be len(y) times len(z):', J_layer_by_incoming_weights_simplified.shape)
         # Initialize before iteration
         J_loss_by_layer = J_loss_by_output
-        # TODO: Add stuff for softmax
-        # j_s_z is softmax jacobian(z)
+        if soft_max_model:
+                
+            # TODO: Add stuff for softmax
+            # j_s_z is softmax jacobian(z)
         for i, layer in enumerate(reversed(self.layers)):
             # Calculate values for updating weights
             J_loss_by_input_weights = J_loss_by_layer * J_layer_by_incoming_weights_simplified
