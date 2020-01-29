@@ -13,11 +13,12 @@ class Loss:
 
 
 class CrossEntropy:
-    def __init__(self, activation):
-        self.activation = activation
+    def __init__(self):
+        print('... using crossentrpy as loss function')
 
     def apply_function(self, y, s):
-        """Return the cross-entropy of vectors y (target) and s (prediction)
+        """
+        Return the cross-entropy loss of vectors y (target) and s (prediction)
 
         :type y: ndarray
         :param y: one-hot vector encoding correct class
@@ -43,3 +44,37 @@ class CrossEntropy:
         :returns: ndarray of size len(s)
         """
         return -y / s
+
+
+class L2:
+    def __init__(self):
+        print('... using L2 as loss function')
+
+    def apply_function(self, y, z):
+        """
+        Return the L2 loss of vectors y (target) and z (prediction)
+
+        :type y: ndarray
+        :param y: vector with target-values
+
+        :type z: ndarray
+        :param z: vector with predicted values
+
+        :returns: scalar cost
+        """
+        # TODO: Is this going to be for more than one output-neuron?
+        return ((y-z)**2)/2
+
+    def gradient(self, y, z):
+        """
+        Return the gradient of L2 of vectors y (target) and z (prediction)
+
+        :type y: ndarray
+        :param y: vector with target-values
+
+        :type z: ndarray
+        :param z: vector with predicted values
+
+        :returns: ndarray of size len(y) (same as len(z))
+        """
+        return y - z
