@@ -23,7 +23,10 @@ if __name__ == '__main__':
         print('Welcome to testspace')
 
     elif Menu == 'Simple nn':
-        # TODO: Bias. Batches
+        # TODO: Bias. Shapes. Batches.
+        # TODO: Figure out shape of training examples, use batches. Ensure jacobi-iteration has correct shapes
+        # TODO: Add bias to the sums
+        # TODO: Add regularization
         print('Simple NN...')
         activation = ReLU()
         loss = L2()

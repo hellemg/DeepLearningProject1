@@ -59,20 +59,20 @@ class Model:
         for i, layer in enumerate(reversed(self.layers[1:])):
             # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
             J_layer_by_sum = layer['activation'].gradient(layer['nodes'])
-            #print('L by Sum: {}'.format(J_layer_by_sum))
             J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
-            #print('Z by Y: {}'.format(J_layer_by_earlier_layer))
             J_loss_by_earlier_layer = J_loss_by_layer @ J_layer_by_earlier_layer
-            #print('L by Y: {}'.format(J_loss_by_layer))
 
-            #print('-----------')
             J_layer_by_weights = np.outer(
                 self.layers[len(self.layers) - i - 1]['nodes'], np.diag(J_layer_by_sum))
-            #print('Z by W: {}'.format(J_layer_by_weights))
             J_loss_by_weigths = J_loss_by_layer * J_layer_by_weights
-            #print('L by W: {}'.format(J_loss_by_weigths))
             layer['weights_transposed'] += self.learning_rate*J_loss_by_weigths
 
+            #print('L by Sum: {}'.format(J_layer_by_sum))
+            #print('Z by Y: {}'.format(J_layer_by_earlier_layer))
+            #print('L by Y: {}'.format(J_loss_by_layer))
+            #print('-----------')
+            #print('Z by W: {}'.format(J_layer_by_weights))
+            #print('L by W: {}'.format(J_loss_by_weigths))
             # Update for the next round
             J_loss_by_layer = J_loss_by_earlier_layer
 
