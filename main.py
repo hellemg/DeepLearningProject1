@@ -36,7 +36,9 @@ if __name__ == '__main__':
         #ones = np.ones((X.shape[0], 1))
         #X = np.concatenate((ones, X), axis=1)
         #model.forward_propagation(np.array([[1], [1]]))
-        model.train(np.array([[1], [1]]), np.array([[1],[0],[1]]), 1000)
+        #model.train(np.array([[1], [1]]), np.array([[1],[0],[1]]), 1000)
+        soft = SoftMax()
+        soft.Jacobian([1,2,3,4])
 
     elif Menu == 'Create config':
         print('Creating config...')

@@ -61,6 +61,13 @@ class SoftMax(Function):
         # https://deepnotes.io/softmax-crossentropy
         raise NotImplementedError
 
+    def Jacobian(self, output_values):
+        exps = np.exp(output_values)
+        # Vector of Softmax-values for each output-value z
+        s = exps/np.sum(exps)
+        return np.diag(s) - np.outer(s,s)
+        
+
 
 class L2:
     def __init__(self, activation):
@@ -68,3 +75,11 @@ class L2:
 
     def nodes_error_in_layer(self, weights_transposed, error_in_next_layer, z):
         return weights_transposed*error_in_next_layer*self.activation.derivative(z)
+
+class CrossEntropy:
+    def __init__(self, activation):
+        self.activation=activation
+
+    def derivative(self, estimated_values, output_values):
+        # TODO: logg loss or cross entropy?
+        return -1*np.sum(estimated_values/output_values)
