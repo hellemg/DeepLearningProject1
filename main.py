@@ -27,18 +27,19 @@ if __name__ == '__main__':
         print('Simple NN...')
         activation = ReLU()
         loss = L2()
-        model = Model(learning_rate=0.1, loss_type=loss)
+        model = Model(learning_rate=0.05, loss_type=loss)
         model.add_layer(1, activation, input_dim=2)
         # Training examples, one per row
         X = np.array([[0, 0],
                       [0, 1],
                       [1, 0],
                       [1, 1]])
+        Y = [[0], [1], [1], [1]]
         # Add x0 = 1 for the biases
         #ones = np.ones((X.shape[0], 1))
         #X = np.concatenate((ones, X), axis=1)
         #model.forward_propagation(np.array([[1], [1]]))
-        model.train(np.array([[1], [1]]), np.array([[1]]), 100)
+        model.train(np.array([[1], [1]]), np.array([[1]]))
         
     elif Menu == 'Create config':
         print('Creating config...')

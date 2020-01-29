@@ -29,7 +29,7 @@ class Model:
             print('activation', layer['activation'])
             print('input dim', layer['input_dim'])
 
-    def train(self, inputs, targets, epochs):
+    def train(self, inputs, targets, epochs=100):
         # Add layer for inputs-nodes
         self.layers.insert(0, {'weights_transposed': None,
                                'nodes': inputs,
@@ -39,22 +39,44 @@ class Model:
         for e in range(epochs):
             self.forward_propagation()
             self.print_layers()
-            print('... backpropagation')
-            output_values = self.layers[-1]['nodes']
-            assert output_values.shape == targets.shape
-            # Scalar error from NN
-            output_errors = self.loss_type.apply_function(
-                y=targets, z=output_values)
-            if np.abs(output_errors) < 0.0000002:
+            prev_output_error = self.backpropagation(targets)
+            if np.abs(prev_output_error) < 0.0000002:
                 print('stop training on round', e,
-                      'loss is', output_errors)
+                  'loss is', prev_output_error)
                 return
-            print('loss:', output_errors)
-            J_loss_by_output = self.loss_type.gradient(
-                y=targets, z=output_values)
-            self.layers[1]['weights_transposed'] += self.learning_rate * \
-                np.transpose(J_loss_by_output)
-            print('new weights:', self.layers[1]['weights_transposed'])
+
+    def backpropagation(self, targets):
+        print('... backpropagation')
+        output_values = self.layers[-1]['nodes']
+        #assert output_values.shape == targets.shape
+        # Scalar error from NN
+        output_errors = self.loss_type.apply_function(
+            y=targets, z=output_values)
+        print('loss:', output_errors)
+        # Change in loss by change in output layer (L by Z)
+        J_loss_by_layer = self.loss_type.gradient(y=targets, z=output_values)
+        # For all but first layer (first layer only have inputs)
+        for i, layer in enumerate(reversed(self.layers[1:])):
+            # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
+            J_layer_by_sum = layer['activation'].gradient(layer['nodes'])
+            #print('L by Sum: {}'.format(J_layer_by_sum))
+            J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
+            #print('Z by Y: {}'.format(J_layer_by_earlier_layer))
+            J_loss_by_earlier_layer = J_loss_by_layer @ J_layer_by_earlier_layer
+            #print('L by Y: {}'.format(J_loss_by_layer))
+
+            #print('-----------')
+            J_layer_by_weights = np.outer(
+                self.layers[len(self.layers) - i - 1]['nodes'], np.diag(J_layer_by_sum))
+            #print('Z by W: {}'.format(J_layer_by_weights))
+            J_loss_by_weigths = J_loss_by_layer * J_layer_by_weights
+            #print('L by W: {}'.format(J_loss_by_weigths))
+            layer['weights_transposed'] += self.learning_rate*J_loss_by_weigths
+
+            # Update for the next round
+            J_loss_by_layer = J_loss_by_earlier_layer
+
+        return output_errors
 
     def jacobian_iteration(self, targets, soft_max_model=True):
         # Values estimated by NN
