@@ -4,6 +4,7 @@ import numpy as np
 from Preprocess import *
 from Function import *
 from Model import *
+from Loss import *
 
 """
 The following imports are OK, and not anything else: numpy, matplotlib.pyplot, configparser, enum,
@@ -24,9 +25,9 @@ if __name__ == '__main__':
     elif Menu == 'Simple nn':
         print('Simple NN...')
         activation = ReLU()
-        loss = L2(activation)
+        loss = L2()
         model = Model(learning_rate=0.1, loss_type=loss)
-        model.add_layer(3, activation, input_dim=2)
+        model.add_layer(1, activation, input_dim=2)
         # Training examples, one per row
         X = np.array([[0, 0],
                       [0, 1],
@@ -36,10 +37,8 @@ if __name__ == '__main__':
         #ones = np.ones((X.shape[0], 1))
         #X = np.concatenate((ones, X), axis=1)
         #model.forward_propagation(np.array([[1], [1]]))
-        #model.train(np.array([[1], [1]]), np.array([[1],[0],[1]]), 1000)
-        soft = SoftMax()
-        soft.Jacobian([1,2,3,4])
-
+        model.train(np.array([[1], [1]]), np.array([[1]]), 100)
+        
     elif Menu == 'Create config':
         print('Creating config...')
         config = configparser.ConfigParser()
