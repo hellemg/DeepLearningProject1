@@ -47,28 +47,7 @@ class TanH(Function):
     def derivative(self, value):
         return (np.cosh(value))**(-2)
 
-
-class SoftMax(Function):
-    def __init__(self):
-        super().__init__()
-
-    def apply_function(self, value):
-        # Stable softmax to avoid NaN-problems
-        exps = np.exp(value - np.max(value))
-        return exps/np.sum(exps)
-
-    def derivative(self, value):
-        # https://deepnotes.io/softmax-crossentropy
-        raise NotImplementedError
-
-    def Jacobian(self, output_values):
-        exps = np.exp(output_values)
-        # Vector of Softmax-values for each output-value z
-        s = exps/np.sum(exps)
-        return np.diag(s) - np.outer(s,s)
-        
-
-
+       
 class L2:
     def __init__(self, activation):
         self.activation=activation
@@ -80,6 +59,63 @@ class CrossEntropy:
     def __init__(self, activation):
         self.activation=activation
 
-    def derivative(self, estimated_values, output_values):
-        # TODO: logg loss or cross entropy?
-        return -1*np.sum(estimated_values/output_values)
+    def gradient(y, s):
+        """
+        Return the gradient of cross-entropy of vectors y and s.
+
+        :type y: ndarray
+        :param y: one-hot vector encoding correct class
+
+        :type s: ndarray
+        :param s: softmax vector
+
+        :returns: ndarray of size len(s)
+        """
+        return -y / s
+
+class Activation:
+    def __init__(self):
+        pass
+
+    def gradient(self, values):
+        raise NotImplementedError
+
+class SoftMax(Activation):
+    def __init__(self):
+        super().__init__()
+
+    def softmax(x):
+        """
+        Return the Softmax of vector x, protected against under/overflow
+        
+        :type x: ndarray
+        :param x: vector input
+        
+        :returns: ndarray of same length as x
+        """
+        x = x - np.max(x)
+        exps = np.exp(x)
+        return exps/np.sum(exps)
+
+    def gradient(self, s):
+        """
+        Returns the Jacobian of the Softmax vector s
+
+        :type s: ndarray
+        :param s vector input
+
+        :returns: ndarray of shape (len(s), len(s))
+        """
+        return np.diag(s) - np.outer(s,s)
+
+    def jacobian(self, x):
+        """
+        Returns the jacobian of vector x, protected against under/overflow
+
+        :type x: ndarray
+        :param x: vector input
+        
+        :returns: ndarray of shape (len(x), len(x))
+        """
+        s = self.softmax(x)
+        return self.gradient(s)
