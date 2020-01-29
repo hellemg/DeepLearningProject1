@@ -43,25 +43,55 @@ class Linear(Activation):
     def __init__(self):
         super().__init__()
 
-    def apply_function(self, value):
-        return value
+    def apply_function(self, z):
+        """
+        Return the Linear of vector z
 
-    def gradient(self, value):
-        return 1
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of same length as z
+        """
+        return z
+
+    def gradient(self, z):
+        """
+        Return the gradient of Linear with respect to vector z
+
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of same length as z        
+        """
+        return np.ones_like(z)
 
 
 class TanH(Activation):
     def __init__(self):
         super().__init__()
 
-    def apply_function(self, value):
-        return np.tanh(value)
+    def apply_function(self, z):
+        """
+        Return the TanH of vector z
 
-    def gradient(self, value):
-        return (np.cosh(value))**(-2)
+        :type z: ndarray
+        :param z: vector input
 
+        :returns: ndarray of same length as z
+        """
+        return np.tanh(z)
 
-class SoftMax(Activation):
+    def gradient(self, z):
+        """
+        Return the gradient of TanH with respect to vector z
+
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of same length as z        
+        """
+        return (np.cosh(z))**(-2)
+
     def __init__(self):
         super().__init__()
 
