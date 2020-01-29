@@ -1,100 +1,81 @@
 import numpy as np
 
 
-class Function:
+class Activation:
     def __init__(self):
-        self.name = 'hei'
+        pass
 
-    def do_the_math(sself, value):
+    def apply_function(self):
         raise NotImplementedError
 
-    def derivative(self, value):
-        """
-        Return derivate of the value
-        """
+    def gradient(self, values):
         raise NotImplementedError
 
 
-class ReLU(Function):
+class ReLU(Activation):
     def __init__(self):
         super().__init__()
 
-    def derivative(self, value):
-        return 1*(value>0)
+    def apply_function(self, z):
+        """
+        Return the ReLU of vector z
 
-    def apply_function(self, value):
-        return np.maximum(0, value)
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of same length as z        
+        """
+        return np.maximum(0, z)
+
+    def gradient(self, z):
+        """
+        Return the gradient of ReLU with respect to vector z
+
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of same length as z        
+        """
+        return 1*(z > 0)
 
 
-class Linear(Function):
+class Linear(Activation):
     def __init__(self):
         super().__init__()
 
     def apply_function(self, value):
         return value
 
-    def derivative(self, value):
+    def gradient(self, value):
         return 1
 
 
-class TanH(Function):
+class TanH(Activation):
     def __init__(self):
         super().__init__()
 
     def apply_function(self, value):
         return np.tanh(value)
 
-    def derivative(self, value):
+    def gradient(self, value):
         return (np.cosh(value))**(-2)
 
-       
-class L2:
-    def __init__(self, activation):
-        self.activation=activation
-
-    def nodes_error_in_layer(self, weights_transposed, error_in_next_layer, z):
-        return weights_transposed*error_in_next_layer*self.activation.derivative(z)
-
-class CrossEntropy:
-    def __init__(self, activation):
-        self.activation=activation
-
-    def gradient(y, s):
-        """
-        Return the gradient of cross-entropy of vectors y and s.
-
-        :type y: ndarray
-        :param y: one-hot vector encoding correct class
-
-        :type s: ndarray
-        :param s: softmax vector
-
-        :returns: ndarray of size len(s)
-        """
-        return -y / s
-
-class Activation:
-    def __init__(self):
-        pass
-
-    def gradient(self, values):
-        raise NotImplementedError
 
 class SoftMax(Activation):
     def __init__(self):
         super().__init__()
 
-    def softmax(x):
+    def apply_function(z):
         """
-        Return the Softmax of vector x, protected against under/overflow
-        
-        :type x: ndarray
-        :param x: vector input
-        
-        :returns: ndarray of same length as x
+        Return the Softmax of vector z, protected against under/overflow
+
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of same length as z
         """
-        x = x - np.max(x)
-        exps = np.exp(x)
+        z = z - np.max(z)
+        exps = np.exp(z)
         return exps/np.sum(exps)
 
     def gradient(self, s):
@@ -106,16 +87,16 @@ class SoftMax(Activation):
 
         :returns: ndarray of shape (len(s), len(s))
         """
-        return np.diag(s) - np.outer(s,s)
+        return np.diag(s) - np.outer(s, s)
 
-    def jacobian(self, x):
+    def jacobian(self, z):
         """
-        Returns the jacobian of vector x, protected against under/overflow
+        Returns the jacobian of vector z, protected against under/overflow
 
-        :type x: ndarray
-        :param x: vector input
-        
-        :returns: ndarray of shape (len(x), len(x))
+        :type z: ndarray
+        :param z: vector input
+
+        :returns: ndarray of shape (len(z), len(z))
         """
-        s = self.softmax(x)
+        s = self.softmax(z)
         return self.gradient(s)

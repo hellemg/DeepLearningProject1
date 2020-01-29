@@ -68,6 +68,7 @@ class Model:
         # Initialize before iteration
         J_loss_by_layer = J_loss_by_output
         # TODO: Add stuff for softmax
+        # j_s_z is softmax jacobian(z)
         for i, layer in enumerate(reversed(self.layers)):
             # Calculate values for updating weights
             J_loss_by_input_weights = J_loss_by_layer * J_layer_by_incoming_weights_simplified
