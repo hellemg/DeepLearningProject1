@@ -1,4 +1,4 @@
-from Function import *
+from Activation import *
 import numpy as np
 
 

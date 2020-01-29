@@ -2,6 +2,10 @@ import configparser
 import csv
 import numpy as np
 
+from Activation import *
+from Loss import *
+
+
 class Preprocess:
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -81,3 +85,26 @@ class Preprocess:
         one_hot[np.arange(no_examples), labels] = 1
         print('... labels are onehot encoded')
         return one_hot
+
+    def get_activation(self, name):
+        """
+        Return the correct class of activation function given by name
+
+        :type name: string
+        :param name: name of activation function
+
+        :returns: subclass of Activation
+        """
+        return {'relu': ReLU(), 'linear': Linear(),
+                       'tanh': TanH(), 'softmax': Softmax()}[name]
+    
+    def get_loss_type(self, name):
+        """
+        Return the correct class of loss function given by name
+
+        :type name: string
+        :param name: name of activation function
+
+        :returns: subclass of Loss
+        """
+        return {'L2': L2(), 'cross_entropy': CrossEntropy()}[name]

@@ -92,6 +92,7 @@ class TanH(Activation):
         """
         return (np.cosh(z))**(-2)
 
+class Softmax(Activation):
     def __init__(self):
         super().__init__()
 
@@ -128,5 +129,5 @@ class TanH(Activation):
 
         :returns: ndarray of shape (len(z), len(z))
         """
-        s = self.softmax(z)
+        s = self.apply_function(z)
         return self.gradient(s)

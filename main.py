@@ -2,7 +2,7 @@ import configparser
 import numpy as np
 
 from Preprocess import *
-from Function import *
+from Activation import *
 from Model import *
 from Loss import *
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         1: 'Simple nn',
         2: 'Create config',
         3: 'Preprocess',
-    }[1]
+    }[3]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
@@ -28,9 +28,13 @@ if __name__ == '__main__':
         # TODO: Add bias to the sums
         # TODO: Add regularization
         print('Simple NN...')
-        activation = ReLU()
-        loss = L2()
-        model = Model(learning_rate=0.05, loss_type=loss)
+        Preprocess = Preprocess()
+        Preprocess.get_config_parameters('config.ini')
+        # Get activation and loss classes
+        activation = Preprocess.get_activation('relu')
+        loss_type = Preprocess.get_loss_type('L2')
+
+        model = Model(learning_rate=0.05, loss_type=loss_type)
         model.add_layer(1, activation, input_dim=2)
         # Training examples, one per row
         X = np.array([[0, 0],
@@ -62,6 +66,11 @@ if __name__ == '__main__':
         print('Reading config file...')
         Preprocess = Preprocess()
         Preprocess.get_config_parameters('config.ini')
+
+        activation = Preprocess.get_activation('tanh')
+        print(activation)
+        loss_type = Preprocess.get_loss_type('L2')
+        print(loss_type)
 
         path = './DATA/train_small.csv'
         x_train, y_train = Preprocess.read_dataset(path)
