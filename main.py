@@ -23,6 +23,7 @@ if __name__ == '__main__':
         print('Welcome to testspace')
 
     elif Menu == 'Simple nn':
+        # TODO: Bias. Batches
         print('Simple NN...')
         activation = ReLU()
         loss = L2()

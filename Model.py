@@ -50,14 +50,13 @@ class Model:
                       'loss is', output_errors)
                 return
             print('loss:', output_errors)
-            error_change = self.loss_type.gradient(
+            J_loss_by_output = self.loss_type.gradient(
                 y=targets, z=output_values)
-            print(error_change)
             self.layers[1]['weights_transposed'] += self.learning_rate * \
-                np.transpose(error_change)
+                np.transpose(J_loss_by_output)
             print('new weights:', self.layers[1]['weights_transposed'])
 
-    def jacobian_iteration(self, soft_max_model):
+    def jacobian_iteration(self, targets, soft_max_model=True):
         # Values estimated by NN
         output_values = self.layers[-1]['nodes']
         # Effect of input to layer on output of layer ()
@@ -74,7 +73,7 @@ class Model:
         J_layer_by_incoming_weights_simplified = np.outer(
             earlier_layer, J_output_layer_by_sum)
         # Change in loss by change of output values (L by Z)
-        J_loss_by_output = self.loss_type.gradient(output_values)
+        J_loss_by_output = self.loss_type.gradient(y=targets, z=output_values)
         # Initialize before iteration
         J_loss_by_layer = J_loss_by_output
         if soft_max_model:
