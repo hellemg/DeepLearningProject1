@@ -17,7 +17,7 @@ if __name__ == '__main__':
         1: 'Simple nn',
         2: 'Create config',
         3: 'Preprocess',
-    }[3]
+    }[1]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
@@ -25,6 +25,7 @@ if __name__ == '__main__':
     elif Menu == 'Simple nn':
         # TODO: Bias. Shapes. Batches.
         # TODO: Figure out shape of training examples, use batches. Ensure jacobi-iteration has correct shapes
+        # TODO: Fix softmax-addition
         # TODO: Add bias to the sums
         # TODO: Add regularization
         print('Simple NN...')

@@ -51,10 +51,10 @@ class Model:
         #assert output_values.shape == targets.shape
         # Scalar error from NN
         output_errors = self.loss_type.apply_function(
-            y=targets, z=output_values)
+            targets, output_values)
         print('loss:', output_errors)
         # Change in loss by change in output layer (L by Z)
-        J_loss_by_layer = self.loss_type.gradient(y=targets, z=output_values)
+        J_loss_by_layer = self.loss_type.gradient(targets, output_values)
         if softmax_model:
             # TODO: Add J_loss_by_softmax
             J_loss_by_softmax = 3

@@ -31,7 +31,7 @@ class CrossEntropy:
         # Since y is one-hot encoded, we can omit multiplying with it and just use s-values where y=1
         return -np.log(s[np.where(y)])
 
-    def gradient(y, s):
+    def gradient(self, y, s):
         """
         Return the gradient of cross-entropy of vectors y (target) and z (prediction)
 

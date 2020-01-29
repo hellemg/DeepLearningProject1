@@ -96,7 +96,7 @@ class Softmax(Activation):
     def __init__(self):
         super().__init__()
 
-    def apply_function(z):
+    def apply_function(self, z):
         """
         Return the Softmax of vector z, protected against under/overflow
 
