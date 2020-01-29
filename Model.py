@@ -8,37 +8,40 @@ class Model:
         self.learning_rate = learning_rate
         self.loss_type = loss_type
 
-    def add_layer(self, no_nodes, activation, input_dim):
+    def add_layer(self, no_nodes, activation, input_dim, batch_size):
         weights = self.get_weights(no_nodes, input_dim)
-        self.layers.append({'weights_transposed': weights,
-                            'nodes': np.zeros((no_nodes, 1)),
+        self.layers.append({'weights': weights,
+                            'nodes': np.zeros((no_nodes, batch_size)),
                             'activation': activation,
                             'input_dim': input_dim})
+        # TODO: Add gradients that keep weight-changes for each layer. Average at the end of each epoch
 
     def get_weights(self, no_nodes, input_dim):
         """
         Initializes transposed weight matrix on shape input dim, no_nodes with the Xavier initialization
         """
         np.random.seed(42)
-        return np.random.normal(0, 1/(np.sqrt(input_dim)), (input_dim, no_nodes)).transpose()
+        return np.random.normal(0, 1/(np.sqrt(input_dim)), (input_dim, no_nodes))#.transpose()
 
     def print_layers(self):
         for layer in self.layers:
-            print('weights:', layer['weights_transposed'])
+            print('weights:', layer['weights'])
             print('nodes', layer['nodes'])
             print('activation', layer['activation'])
             print('input dim', layer['input_dim'])
 
     def train(self, inputs, targets, epochs=1):
         # Add layer for inputs-nodes
-        self.layers[0] = {'weights_transposed': None,
+        self.layers[0] = {'weights': None,
                           'nodes': inputs,
                           'activation': None,
                           'input_dim': None}
         # Run FP, BP for each epoch
         for e in range(epochs):
+            self.print_layers()
             self.forward_propagation()
             self.print_layers()
+            return
             prev_output_error = self.backpropagation(targets)
             if np.abs(prev_output_error) < 0.0000002:
                 print('stop training on round', e,
@@ -67,13 +70,13 @@ class Model:
         for i, layer in enumerate(reversed(self.layers[1:])):
             # Change in a layer's nodes by the earlier layer's nodes (Z by Y)
             J_layer_by_sum = layer['activation'].gradient(layer['nodes'])
-            J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights_transposed']
+            J_layer_by_earlier_layer = J_layer_by_sum @ layer['weights']
             J_loss_by_earlier_layer = J_loss_by_layer @ J_layer_by_earlier_layer
 
             J_layer_by_weights = np.outer(
                 self.layers[len(self.layers) - i - 1]['nodes'], np.diag(J_layer_by_sum))
             J_loss_by_weigths = J_loss_by_layer * J_layer_by_weights
-            layer['weights_transposed'] += self.learning_rate*J_loss_by_weigths
+            layer['weights'] += self.learning_rate*J_loss_by_weigths
 
             #print('L by Sum: {}'.format(J_layer_by_sum))
             #print('Z by Y: {}'.format(J_layer_by_earlier_layer))
@@ -87,8 +90,7 @@ class Model:
 
     def forward_propagation(self):
         print('... forward propagation')
-        for i, layer in enumerate(self.layers[:-1]):
-            z = np.matmul(self.layers[i+1]
-                          ['weights_transposed'], layer['nodes'])
-            self.layers[i+1]['nodes'] = self.layers[i +
-                                                    1]['activation'].apply_function(z)
+        for i, layer in enumerate(self.layers[1:]):
+            # Index with i, which is 0 when we are at layer 1
+            z = np.matmul(self.layers[i]['nodes'], layer['weights'])
+            layer['nodes'] = layer['activation'].apply_function(z)

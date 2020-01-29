@@ -36,18 +36,18 @@ if __name__ == '__main__':
         loss_type = Preprocess.get_loss_type('L2')
 
         model = Model(learning_rate=0.05, loss_type=loss_type)
-        model.add_layer(1, activation, input_dim=2)
         # Training examples, one per row
         X = np.array([[0, 0],
                       [0, 1],
                       [1, 0],
                       [1, 1]])
-        Y = [[0], [1], [1], [1]]
+        Y = [0, 1, 1, 1]
+        model.add_layer(1, activation, input_dim=2, batch_size=len(Y))
         # Add x0 = 1 for the biases
         #ones = np.ones((X.shape[0], 1))
         #X = np.concatenate((ones, X), axis=1)
         #model.forward_propagation(np.array([[1], [1]]))
-        model.train(np.array([[1], [1]]), np.array([[1]]))
+        model.train(X, Y)
         
     elif Menu == 'Create config':
         print('Creating config...')
