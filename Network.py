@@ -52,7 +52,7 @@ class Network:
         :type weights: list of ndarrays, each ndarray is num_nodes x num_nodes_prevlayer
         """
         np.random.seed(42)
-        self.biases = [np.random.randn(y, 1) for y in self.layer_sizes[1:]]
+        self.biases = [np.random.randn(y) for y in self.layer_sizes[1:]]
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
@@ -109,8 +109,8 @@ class Network:
         # self.print_layers()
         for i in range(mini_batch_size):
             # Make x column vector
-            x = X[:, i][:, np.newaxis]
-            y = Y[i][:, np.newaxis]
+            x = mini_batch[i, :-num_classes]
+            y = mini_batch[i, -num_classes:]
             # Compute weight changes, bias changes, and loss for each training case
             delta_nabla_b, delta_nabla_w, training_example_cost = self.backpropagate(
                 x, y)
@@ -127,6 +127,29 @@ class Network:
                                             nabla_w[hl])/mini_batch_size
             self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
+
+    def forward_propagation_old(self, x):
+        """
+        Complete forward propagation through all layers of the network.
+        Set zs for all layers, except input layer
+        Set activated_nodes for all layers, first activated_nodes is the input layer
+
+        :type x: ndarray of shape num_features x ,
+        :param x: training examples for one minibatch
+
+        :returns: ndarray of shape num_classes x , (output of neural network)
+        """
+        # print('... forward propagation')
+        activated_node = x
+        # list to store all the activated nodes, layer by layer
+        self.activated_nodes = [x]
+        self.zs = []  # list to store all the z vectors, layer by layer
+        for i, (b, w) in enumerate(zip(self.biases, self.weights_transposed)):
+            z = np.dot(w, activated_node)+b
+            self.zs.append(z)
+            activated_node = self.activations[i].apply_function(z)
+            self.activated_nodes.append(activated_node)
+        return activated_node
 
     def forward_propagation(self, x):
         """
@@ -145,7 +168,9 @@ class Network:
         self.activated_nodes = [x]
         self.zs = []  # list to store all the z vectors, layer by layer
         for i, (b, w) in enumerate(zip(self.biases, self.weights_transposed)):
-            z = np.dot(w, activated_node)+b
+            weights = self.weights_transposed[i]
+            bias = self.biases[i]
+            z = np.dot(weights, activated_node)+bias
             self.zs.append(z)
             activated_node = self.activations[i].apply_function(z)
             self.activated_nodes.append(activated_node)
@@ -153,10 +178,10 @@ class Network:
 
     def backpropagate(self, x, y):
         """
-        :type x: ndarray of shape num_features x num_examples(==1)
+        :type x: ndarray of shape num_features x ,
         :param x: training example
 
-        :type y: ndarray of shape num_classes x num_examples(==1)
+        :type y: ndarray of shape num_classes x ,
         :param y: target
 
         :returns: list of changes in weights for each layer, list of changes
@@ -168,23 +193,23 @@ class Network:
         nabla_b = [np.zeros_like(b) for b in self.biases]
         nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
         # Forward propagation
-        output_layer = self.forward_propagation(x).T[0]
-        y = y.T[0]
+        output_layer = self.forward_propagation(x)
         loss_gradient = self.loss_type.gradient(y, output_layer)
-        activation_gradient = self.activations[-1].gradient(self.zs[-1]).T[0]
+        activation_gradient = self.activations[-1].gradient(self.zs[-1])
         delta = np.multiply(loss_gradient, activation_gradient)
         # Update last bias-layer
-        nabla_b[-1] = delta[:, np.newaxis]
+        nabla_b[-1] = delta
+        print('---- all above is ok ---')
         # Update last weight-layer
         previous_a = self.activated_nodes[-2]
         print('delta:',delta.shape)
         print('prev a:',previous_a.shape)
         print(self.weights_transposed[-1].shape)
+        print(np.dot(delta, previous_a.T))
 
         # TODO: find combinations of these nabla_w[-1] = previous_a, delta
         # previous layer does not have same shape as last layer
-
-        print('---------')
+        return
         # Iterate backwards
         for l in range(2, self.num_layers+1):
             z = self.zs[-1].T[0]

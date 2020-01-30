@@ -206,8 +206,8 @@ if __name__ == '__main__':
 
         # Model
         layers = [5, 4, 3]
-        activations = ['relu', 'tanh', 'softmax']
-        loss_type = 'cross_entropy'
+        activations = ['relu', 'tanh', 'relu']
+        loss_type = 'L2'
 
         # Hyper
         learning_rate = 0.01
