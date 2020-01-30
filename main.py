@@ -48,7 +48,7 @@ if __name__ == '__main__':
         3: 'Preprocess',
         4: 'Minimalist example for classification',
         5: 'Arbitrary NN',
-    }[4]
+    }[5]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
@@ -207,7 +207,7 @@ if __name__ == '__main__':
         # Model
         layers = [5, 4, 3]
         activations = ['relu', 'tanh', 'linear']
-        loss_type = 'cross_entropy'
+        loss_type = 'L2'
 
         # Hyper
         learning_rate = 0.01
@@ -226,7 +226,7 @@ if __name__ == '__main__':
 
         if num_classes > 1:
             # One hot encode Y
-            Y = Preprocess.one_hot_encode(X.shape[0], num_output_nodes, Y)
+            Y = Preprocess.one_hot_encode(X.shape[0], num_classes, Y)
         else:
             # Make Y a column vector
             Y = Y[:, np.newaxis]
@@ -251,7 +251,7 @@ if __name__ == '__main__':
         network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
 
         # Train network
-        training_cost = network.train(training_data, num_classes)
+        training_cost = network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
         print('--- training cost development:', training_cost)
         loss = network.test(x_dev, y_dev)
         print('-- validation loss:', loss)
