@@ -33,25 +33,29 @@ no_epochs = 100
 L2_regularization = 'heihei'
 """
 
+
 def write_weights_to_file(neural_network, path='somefile.txt'):
     with open(path, 'w') as filehandle:
-            for weights in neural_network.weights_transposed:
-                filehandle.write('{}\n'.format(weights))
+        for weights in neural_network.weights_transposed:
+            filehandle.write('{}\n'.format(weights))
+
 
 if __name__ == '__main__':
     Menu = {
         -1: 'Testspace',
-        1: 'Simple nn',
+        1: 'Minimalist example for regression',
         2: 'Create config',
         3: 'Preprocess',
-        4: 'Simple classifier',
-    }[1]
+        4: 'Minimalist example for classification',
+        5: 'Arbitrary NN',
+    }[4]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
 
         hidden_layers = [2, 1]
-        activations = [Preprocess.get_activation(name) for name in activation_names]
+        activations = [Preprocess.get_activation(
+            name) for name in activation_names]
         loss_type = Preprocess.get_loss_type(loss_type_name)
         # Hyper
         learning_rate = 0.01
@@ -61,9 +65,9 @@ if __name__ == '__main__':
         # X from dataset has shape no_examples x no_features
         # Y from dataset has shape no_examples x 1
         X = np.array([[1, 1],
-                     [1, 0],
-                     [0, 1],
-                     [0, 0]])
+                      [1, 0],
+                      [0, 1],
+                      [0, 0]])
         Y = np.array([1, 1, 1, 0])
         # Make Y a column vector
         Y = Y[:, np.newaxis]
@@ -72,19 +76,21 @@ if __name__ == '__main__':
             num_output_nodes = 1
         elif loss_type_name == 'cross_entropy':
             num_output_nodes = max(y_train) + 1
-            y_train = Preprocess.one_hot_encode(num_examples_train, num_output_nodes, y_train)
-            y_dev = Preprocess.one_hot_encode(num_examples_dev, num_output_nodes, y_dev)
+            y_train = Preprocess.one_hot_encode(
+                num_examples_train, num_output_nodes, y_train)
+            y_dev = Preprocess.one_hot_encode(
+                num_examples_dev, num_output_nodes, y_dev)
 
         print('-----------------------------')
         print(X.shape)
-        #Define network
+        # Define network
         network = Network(hidden_layers[0])
         for i in range(len(hidden_layers)-1):
             network.add_layer(hidden_layers[i+1], activations[i])
         network.compile(learning_rate, loss_type)
         network.train(training_data)
 
-    elif Menu == 'Simple nn':
+    elif Menu == 'Minimalist example for regression':
         print('___ Task 2.1')
         # Hyper
         learning_rate = 0.01
@@ -93,18 +99,18 @@ if __name__ == '__main__':
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
         X = np.array([[1, 1],
-                     [1, 0],
-                     [0, 1],
-                     [0, 0]])
+                      [1, 0],
+                      [0, 1],
+                      [0, 0]])
         Y = np.array([1, 1, 1, 0])
         # Make Y a column vector
         Y = Y[:, np.newaxis]
         training_data = np.hstack((X, Y))
 
         x_dev = np.array([[1, 1],
-                     [1, 0],
-                     [0, 1],
-                     [0, 0]])
+                          [1, 0],
+                          [0, 1],
+                          [0, 0]])
 
         y_dev = np.array([1, 1, 1, 0])
         # Define network
@@ -114,7 +120,7 @@ if __name__ == '__main__':
         network.add_layer(1, Preprocess.get_activation('relu'))
         network.compile(learning_rate, Preprocess.get_loss_type('L2'))
 
-        #Train network
+        # Train network
         training_cost = network.train(training_data)
         print('--- training cost development:', training_cost)
         loss = network.test(x_dev, y_dev)
@@ -147,3 +153,108 @@ if __name__ == '__main__':
         no_examples = len(y_train)
         no_classes = max(y_train) + 1
         one_hot = Preprocess.one_hot_encode(no_examples, no_classes, y_train)
+
+    elif Menu == 'Minimalist example for classification':
+        print('___ Task 2.2')
+        # Hyper
+        learning_rate = 0.01
+        no_epochs = 100
+
+        # X from dataset has shape num_examples x num_features
+        # Y from dataset has shape num_examples x 1
+        X = np.array([[1, 1],
+                      [1, 0],
+                      [0, 1],
+                      [0, 0]])
+        Y = np.array([1, 2, 2, 0])
+
+        num_output_nodes = Y.max()+1
+        Y = Preprocess.one_hot_encode(X.shape[0], num_output_nodes, Y)
+
+        # Make Y a column vector
+        #Y = Y[:, np.newaxis]
+        training_data = np.hstack((X, Y))
+
+        x_dev = np.array([[1, 1],
+                          [1, 0],
+                          [0, 1],
+                          [0, 0]])
+
+        y_dev = np.array([1, 1, 1, 0])
+        # Define network
+        # First layer should have size num_features
+        network = Network(X.shape[1])
+        # Add output layer
+        network.add_layer(num_output_nodes,
+                          Preprocess.get_activation('softmax'))
+        network.compile(
+            learning_rate, Preprocess.get_loss_type('cross_entropy'))
+
+        # Train network
+        training_cost = network.train(training_data, num_output_nodes)
+        print('--- training cost development:', training_cost)
+        loss = network.test(x_dev, y_dev)
+        print('-- validation loss:', loss)
+
+        # Dump weights (transposed) to file
+        write_weights_to_file(network)
+
+    elif Menu == 'Arbitrary NN':
+        # Data
+        # train_path
+        # dev_path
+
+        # Model
+        layers = [5, 4, 3]
+        activations = ['relu', 'tanh', 'linear']
+        loss_type = 'cross_entropy'
+
+        # Hyper
+        learning_rate = 0.01
+        no_epochs = 10
+        L2_regularization = None
+
+        # X from dataset has shape num_examples x num_features
+        # Y from dataset has shape num_examples x 1
+        X = np.array([[1, 1],
+                      [1, 0],
+                      [0, 1],
+                      [0, 0]])
+        Y = np.array([1, 2, 2, 0])
+
+        num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
+
+        if num_classes > 1:
+            # One hot encode Y
+            Y = Preprocess.one_hot_encode(X.shape[0], num_output_nodes, Y)
+        else:
+            # Make Y a column vector
+            Y = Y[:, np.newaxis]
+        
+        # Combine X and Y
+        training_data = np.hstack((X, Y))
+
+        x_dev = np.array([[1, 1],
+                          [1, 0],
+                          [0, 1],
+                          [0, 0]])
+        y_dev = np.array([1, 1, 1, 0])
+
+        # Define network
+        network = Network(X.shape[1]) # First layer should have size num_features
+        # Add hidden layers
+        for i in range(len(layers)):
+            layer_size = layers[i]
+            activation = Preprocess.get_activation(activations[i])
+            network.add_layer(layer_size, activation)
+        # Compile network
+        network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
+
+        # Train network
+        training_cost = network.train(training_data, num_classes)
+        print('--- training cost development:', training_cost)
+        loss = network.test(x_dev, y_dev)
+        print('-- validation loss:', loss)
+
+        # Dump weights (transposed) to file
+        write_weights_to_file(network)

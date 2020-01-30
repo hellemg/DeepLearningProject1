@@ -6,6 +6,7 @@ zs: previous layer dotted with incoming weights
 activated_nodes: activation function on zs
 """
 
+
 class Network:
     def __init__(self, input_layer_size):
         self.layer_sizes = [input_layer_size]
@@ -55,7 +56,7 @@ class Network:
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
-    def train(self, training_data, epochs=10, mini_batch_size=4):
+    def train(self, training_data, num_classes=1, epochs=1, mini_batch_size=4):
         """
         Train the network on training_data with batch_size 4, 10 epochs
 
@@ -74,7 +75,8 @@ class Network:
                             for i in range(0, n, mini_batch_size)]
             # Train over each minibatch
             for mini_batch in mini_batches:
-                mini_batch_cost = self.update_mini_batch(mini_batch)
+                mini_batch_cost = self.update_mini_batch(
+                    mini_batch, num_classes)
                 training_cost.append(mini_batch_cost)
             print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
             # If mini_batch_size=1, this needs to bed removed
@@ -83,7 +85,7 @@ class Network:
                 return training_cost
         return training_cost
 
-    def update_mini_batch(self, mini_batch):
+    def update_mini_batch(self, mini_batch, num_classes):
         """
         Update weights and biases for all layers by applying gradient descent
         to a mini batch. Both are updated with the average gradient for each
@@ -95,13 +97,13 @@ class Network:
         :returns: average cost for the minibatch
         """
         mini_batch_size = mini_batch.shape[0]
-        # print('mini batch: {}'.format(mini_batch))
+        #print('mini batch: {}'.format(mini_batch))
         nabla_b = [np.zeros_like(b) for b in self.biases]
         nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
         mini_batch_cost = 0
         # Get X (num_features x num_examples)
-        X = mini_batch[:, :-1].T
-        Y = mini_batch[:, -1][:, np.newaxis]
+        X = mini_batch[:, :-num_classes].T
+        Y = mini_batch[:, -num_classes:]
         # Forward propagation on full minibatch
         self.forward_propagation(X)
         # self.print_layers()
@@ -120,7 +122,7 @@ class Network:
         # Update all weights and biases with the average gradient
         for hl in range(self.num_layers - 1):
             self.weights_transposed[hl] -= (self.learning_rate *
-                                           nabla_w[hl])/mini_batch_size
+                                            nabla_w[hl])/mini_batch_size
             self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
 
@@ -143,7 +145,7 @@ class Network:
         for i, (b, w) in enumerate(zip(self.biases, self.weights_transposed)):
             z = np.dot(w, activated_node)+b
             self.zs.append(z)
-            activated_node = self.activations[i].gradient(z)
+            activated_node = self.activations[i].apply_function(z)
             self.activated_nodes.append(activated_node)
         return activated_node
 
@@ -184,8 +186,9 @@ class Network:
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, self.activated_nodes[-l-1].transpose())
         """
-        prediction = self.activated_nodes[-1]
-        cost = self.loss_type.apply_function(y, prediction)
+        prediction = self.activated_nodes[-1].T
+        for pred in prediction:
+            cost = self.loss_type.apply_function(y.T, pred)
         return nabla_b, nabla_w, cost
 
     def test(self, x, y):
@@ -194,8 +197,8 @@ class Network:
         :type x: ndarray of shape num_examples x num_features
         :param y: ndarray of shape num_classes x num_examples
         """
-        z = self.forward_propagation(x.T)
-        return self.loss_type.apply_function(y, z)/z.shape[1]
+        z = self.forward_propagation(x.T).T
+        return self.loss_type.apply_function(y.T, z)/z.shape[1]
 
     def print_layers(self):
         print('--- input nodes ---')
