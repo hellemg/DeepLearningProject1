@@ -103,7 +103,7 @@ if __name__ == '__main__':
                      [0, 0]])
 
         y_dev = np.array([1, 1, 1, 0])
-        
+        print(training_data.shape)
         # Define network
         # First layer should have size num_features
         network = Network(X.shape[1])
@@ -112,7 +112,8 @@ if __name__ == '__main__':
         network.compile(learning_rate, Preprocess.get_loss_type('L2'))
 
         #Train network
-        network.train(training_data)
+        training_cost = network.train(training_data)
+        print('--- training cost development:', training_cost)
         loss = network.test(x_dev, y_dev)
         print('-- validation loss:', loss)
 

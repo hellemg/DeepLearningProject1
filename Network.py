@@ -57,29 +57,46 @@ class Network:
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
     def train(self, training_data, epochs=10, mini_batch_size=4):
-        # Number of training examples
+        """
+        Train the network on training_data with batch_size 4, 10 epochs
+
+        :type training_data: ndarray of shape num_examples x num_features+1
+        :param training_data: inputs to network horizontally stacked with targets
+
+        :returns: list of training costs for each epoch
+        """
         n = len(training_data)
         training_cost = []
         for j in range(epochs):
+            # Shuffles the rows of training_data
             np.random.shuffle(training_data)
             # Create minibatches
             mini_batches = [training_data[i:i+mini_batch_size]
                             for i in range(0, n, mini_batch_size)]
             # Train over each minibatch
             for mini_batch in mini_batches:
-                mini_batch_cost = self.update_mini_batch(mini_batch, n)
+                mini_batch_cost = self.update_mini_batch(mini_batch)
                 training_cost.append(mini_batch_cost)
             print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
+            # If mini_batch_size=1, this needs to bed removed
             if mini_batch_cost < 0.00002:
                 print('Quit training, small loss')
                 return training_cost
         return training_cost
 
-    def update_mini_batch(self, mini_batch, n):
+    def update_mini_batch(self, mini_batch):
         """Update the network's weights and biases by applying gradient
         descent using backpropagation to a single mini batch.  The
         ``mini_batch`` is a list of tuples ``(x, y)``, and
         ``n`` is the total size of the training data set.
+        """
+        """
+        Update weights and biases for all layers by applying gradient descent
+        to a mini batch. Both are updated with the average gradient for each
+        training example.
+
+        :type mini_batch: ndarray of shape mini_batch_size x num_features+1
+        :param mini_batch: inputs to network horizontally stacked with targets
         """
         # print('mini batch: {}'.format(mini_batch))
         nabla_b = [np.zeros(b.shape) for b in self.biases]
@@ -91,7 +108,6 @@ class Network:
         # Forward propagation on full minibatch
         self.forward_propagation(X)
         #self.print_layers()
-        return 0.0000005
         for training_example in mini_batch:
             # Make x column vector
             x = training_example[:-1][:, np.newaxis]
