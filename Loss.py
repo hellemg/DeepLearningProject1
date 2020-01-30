@@ -69,13 +69,13 @@ class L2:
         """
         Return the gradient of L2 of vectors y (target) and z (prediction)
 
-        :type y: ndarray
+        :type y: ndarray of shape num_output_nodes x 1
         :param y: vector with target-values
 
-        :type z: ndarray
+        :type z: ndarray of shape num_output_nodes x num_examples
         :param z: vector with predicted values
 
-        :returns: ndarray of size len(y) (same as len(z))
+        :returns: ndarray of size num_output_nodes x num_examples
         """
         output_size = len(z)
         return 2*(y - z)/output_size

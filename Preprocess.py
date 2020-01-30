@@ -61,7 +61,7 @@ class Preprocess:
         numpy array of shape no_examples x no_features, examples from dataset
         numpy array of shape no_examples x 1, labels from dataset
         """
-        x = []
+        x = [[]]
         y = []
         with open(path) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
@@ -69,7 +69,7 @@ class Preprocess:
                 x.append([int(float(x)) for x in row[:-1]])
                 y.append(int(float(row[-1])))
         print('... dataset is loaded from'+path)
-        return np.array(x), np.array(y)
+        return np.array(x[1:]), np.array(y)
 
     def one_hot_encode(self, no_examples, no_classes, labels):
         """
