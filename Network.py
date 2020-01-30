@@ -85,11 +85,6 @@ class Network:
         return training_cost
 
     def update_mini_batch(self, mini_batch):
-        """Update the network's weights and biases by applying gradient
-        descent using backpropagation to a single mini batch.  The
-        ``mini_batch`` is a list of tuples ``(x, y)``, and
-        ``n`` is the total size of the training data set.
-        """
         """
         Update weights and biases for all layers by applying gradient descent
         to a mini batch. Both are updated with the average gradient for each
@@ -97,33 +92,35 @@ class Network:
 
         :type mini_batch: ndarray of shape mini_batch_size x num_features+1
         :param mini_batch: inputs to network horizontally stacked with targets
+
+        :returns: average cost for the minibatch
         """
+        mini_batch_size = mini_batch.shape[0]
         # print('mini batch: {}'.format(mini_batch))
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_w = [np.zeros(w.shape) for w in self.weights_transposed]
+        nabla_b = [np.zeros_like(b) for b in self.biases]
+        nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
         mini_batch_cost = 0
         # Get X (num_features x num_examples)
         X = mini_batch[:, :-1].T
         Y = mini_batch[:, -1][:, np.newaxis]
         # Forward propagation on full minibatch
         self.forward_propagation(X)
-        #self.print_layers()
-        for training_example in mini_batch:
+        # self.print_layers()
+        for i in range(mini_batch_size):
             # Make x column vector
-            x = training_example[:-1][:, np.newaxis]
-            y = np.array([training_example[-1]])[:, np.newaxis]
-            # Compute weight changes for each training case
+            x = X[:, i][:, np.newaxis]
+            y = Y[i][:, np.newaxis]
+            # Compute weight changes, bias changes, and loss for each training case
             delta_nabla_b, delta_nabla_w, training_example_cost = self.backpropagate(
                 x, y)
             # Sum all weight changes for each batch to get the gradient
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
             mini_batch_cost += training_example_cost
-        # Update all weights with the average gradient
-        self.weights_transposed = [w-(self.learning_rate*nw)/len(mini_batch)
-                                   for w, nw in zip(self.weights_transposed, nabla_w)]
-        self.biases = [b-(self.learning_rate*nb)/len(mini_batch)
-                       for b, nb in zip(self.biases, nabla_b)]
+        # Update all weights and biases with the average gradient
+        for i in range(len(self.weights_transposed)):
+            self.weights_transposed[i] -= (self.learning_rate*nabla_w[i])/mini_batch_size
+            self.biases[i] -= (self.learning_rate*nabla_b[i])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
 
     def forward_propagation(self, x):
