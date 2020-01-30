@@ -206,8 +206,8 @@ if __name__ == '__main__':
 
         # Model
         layers = [5, 4, 3]
-        activations = ['relu', 'tanh', 'linear']
-        loss_type = 'L2'
+        activations = ['relu', 'tanh', 'softmax']
+        loss_type = 'cross_entropy'
 
         # Hyper
         learning_rate = 0.01
@@ -222,23 +222,26 @@ if __name__ == '__main__':
                       [0, 0]])
         Y = np.array([1, 2, 2, 0])
 
-        num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-
-        if num_classes > 1:
-            # One hot encode Y
-            Y = Preprocess.one_hot_encode(X.shape[0], num_classes, Y)
-        else:
-            # Make Y a column vector
-            Y = Y[:, np.newaxis]
-        
-        # Combine X and Y
-        training_data = np.hstack((X, Y))
-
+        # Dev sets        
         x_dev = np.array([[1, 1],
                           [1, 0],
                           [0, 1],
                           [0, 0]])
         y_dev = np.array([1, 1, 1, 0])
+
+        num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
+
+        if num_classes > 1:
+            # One hot encode Y
+            Y = Preprocess.one_hot_encode(X.shape[0], num_classes, Y)
+            y_dev = Preprocess.one_hot_encode(x_dev.shape[0], num_classes, y_dev)
+        else:
+            # Make Y a column vector
+            Y = Y[:, np.newaxis]
+            y_dev = y_dev[:, np.newaxis]
+        
+        # Combine X and Y
+        training_data = np.hstack((X, Y))
 
         # Define network
         network = Network(X.shape[1]) # First layer should have size num_features
@@ -253,8 +256,8 @@ if __name__ == '__main__':
         # Train network
         training_cost = network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
         print('--- training cost development:', training_cost)
-        loss = network.test(x_dev, y_dev)
-        print('-- validation loss:', loss)
+        # TODO: loss = network.test(x_dev, y_dev)
+        # print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
-        write_weights_to_file(network)
+        #write_weights_to_file(network)

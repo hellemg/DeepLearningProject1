@@ -20,16 +20,16 @@ class CrossEntropy:
         """
         Return the cross-entropy loss of vectors y (target) and s (prediction)
 
-        :type y: ndarray
+        :type y: ndarray of shape num_classe x ,
         :param y: one-hot vector encoding correct class
 
-        :type s: ndarray
+        :type s: ndarray of shape num_classe x ,
         :param s: softmax vector
 
         :returns: scalar cost
         """
         # Since y is one-hot encoded, we can omit multiplying with it and just use s-values where y=1
-        return -np.log(s[np.where(y[0])])[0]
+        return -np.log(s[np.where(y)])
 
     def gradient(self, y, s):
         """
