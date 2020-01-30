@@ -24,11 +24,16 @@ if __name__ == '__main__':
         print('Welcome to testspace')
         Preprocess = Preprocess()
         Preprocess.get_config_parameters('config.ini')
-        # Get activation and loss classes
+        # Data
+        train_path = Preprocess.train_path
+        dev_path = Preprocess.dev_path
+        x_train, y_train = Preprocess.read_dataset(train_path)
+        x_dev, y_dev = Preprocess.read_dataset(dev_path)
         # Model
-        layers = [2, 1]
         activation_names = ['relu']
         loss_type_name = 'L2'
+
+        layers = [2, 1]
         activations = [Preprocess.get_activation(name) for name in activation_names]
         loss_type = Preprocess.get_loss_type(loss_type_name)
         # Hyper
@@ -46,6 +51,8 @@ if __name__ == '__main__':
         # Make Y a column vector
         Y = Y[:, np.newaxis]
         training_data = np.hstack((X, Y))
+
+        #Define network
         network = Network(layers[0])
         for i in range(len(layers)-1):
             network.add_layer(layers[i+1], activations[i])
