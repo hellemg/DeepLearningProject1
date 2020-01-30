@@ -6,7 +6,6 @@ zs: previous layer dotted with incoming weights
 activated_nodes: activation function on zs
 """
 
-
 class Network:
     def __init__(self, input_layer_size):
         self.layer_sizes = [input_layer_size]
@@ -113,14 +112,16 @@ class Network:
             # Compute weight changes, bias changes, and loss for each training case
             delta_nabla_b, delta_nabla_w, training_example_cost = self.backpropagate(
                 x, y)
-            # Sum all weight changes for each batch to get the gradient
-            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+            # Sum weight changes in each layer
+            for r in range(self.num_layers-1):
+                nabla_w[r] += delta_nabla_w[r]
+                nabla_b[r] += delta_nabla_b[r]
             mini_batch_cost += training_example_cost
         # Update all weights and biases with the average gradient
-        for i in range(len(self.weights_transposed)):
-            self.weights_transposed[i] -= (self.learning_rate*nabla_w[i])/mini_batch_size
-            self.biases[i] -= (self.learning_rate*nabla_b[i])/mini_batch_size
+        for hl in range(self.num_layers - 1):
+            self.weights_transposed[hl] -= (self.learning_rate *
+                                           nabla_w[hl])/mini_batch_size
+            self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
 
     def forward_propagation(self, x):
@@ -148,9 +149,14 @@ class Network:
 
     def backpropagate(self, x, y):
         """
-        :param x: n x m matrice, where n is the number of training examples and m is the number of features
+        :type x: ndarray of shape num_features x num_examples(==1)
+        :param x: training example
 
-        :returns: list of changes in weights for each layer, list of changes in biases for each layer
+        :type y: ndarray of shape num_classes x num_examples(==1)
+        :param y: target
+
+        :returns: list of changes in weights for each layer, list of changes
+        in biases for each layer, cost for training example
         """
         # Empty arrays to hold changes in each layer
         # print('x shape: {}'.format(x.shape))
@@ -162,6 +168,7 @@ class Network:
         # self.print_layers()
         # Gradient descent
         # Error in loss by error in zs
+        """ 
         delta = (self.loss_type).gradient(
             y, self.activated_nodes[-1]) * self.activations[-1].gradient(self.zs[-1])
         # Update last bias-layer
@@ -176,6 +183,7 @@ class Network:
                            delta) * activation_derivative
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, self.activated_nodes[-l-1].transpose())
+        """
         prediction = self.activated_nodes[-1]
         cost = self.loss_type.apply_function(y, prediction)
         return nabla_b, nabla_w, cost
