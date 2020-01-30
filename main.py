@@ -33,6 +33,11 @@ no_epochs = 100
 L2_regularization = 'heihei'
 """
 
+def write_weights_to_file(neural_network, path='somefile.txt'):
+    with open(path, 'w') as filehandle:
+            for weights in neural_network.weights_transposed:
+                filehandle.write('{}\n'.format(weights))
+
 if __name__ == '__main__':
     Menu = {
         -1: 'Testspace',
@@ -84,7 +89,6 @@ if __name__ == '__main__':
         # Hyper
         learning_rate = 0.01
         no_epochs = 100
-        L2_regularization = 'heihei'
 
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
@@ -103,7 +107,6 @@ if __name__ == '__main__':
                      [0, 0]])
 
         y_dev = np.array([1, 1, 1, 0])
-        print(training_data.shape)
         # Define network
         # First layer should have size num_features
         network = Network(X.shape[1])
@@ -116,6 +119,9 @@ if __name__ == '__main__':
         print('--- training cost development:', training_cost)
         loss = network.test(x_dev, y_dev)
         print('-- validation loss:', loss)
+
+        # Dump weights (transposed) to file
+        write_weights_to_file(network)
 
     elif Menu == 'Create config':
         print('Creating config...')
