@@ -254,6 +254,8 @@ if __name__ == '__main__':
         network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
 
         # Train network
+        # TODO: Forward propagation with x.shape: num_nodes x ,
+        # TODO: BP with the same
         training_cost = network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
         print('--- training cost development:', training_cost)
         # TODO: loss = network.test(x_dev, y_dev)
