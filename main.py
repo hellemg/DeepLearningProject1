@@ -60,49 +60,7 @@ if __name__ == '__main__':
         network.train(training_data)
 
     elif Menu == 'Simple nn':
-        # TODO: Bias. Shapes. Batches.
-        # TODO: Figure out shape of training examples, use batches. Ensure jacobi-iteration has correct shapes
-        # TODO: Fix softmax-addition
-        # TODO: Add bias to the sums
-        # TODO: Add regularization
-        print('Simple NN...')
-        Preprocess = Preprocess()
-        Preprocess.get_config_parameters('config.ini')
-        # Get activation and loss classes
-        # Model
-        layers = [2, 3, 1]
-        activation = Preprocess.get_activation('relu')
-        loss_type = Preprocess.get_loss_type('L2')
-        # Hyper
-        learning_rate = 0.01
-        no_epochs = 100
-        L2_regularization = 'heihei'
-
-        """     
-        model = Model(learning_rate, loss_type)
-        model.add_layer(2, activation, input_dim=2)
-        # Training examples, one per row
-        """
-        X = np.array([[0, 0],
-                      [0, 1],
-                      [1, 0],
-                      [1, 1]])
-        Y = np.array([[0], [1], [1], [1]])
-        X = np.array([[0, 0, 1, 1], [0, 1, 0, 1]])
-        """
-        X = np.array([[1], [1]])
-        Y = np.array([[0.5], [0.5]])
-        # Add x0 = 1 for the biases
-        #ones = np.ones((X.shape[0], 1))
-        #X = np.concatenate((ones, X), axis=1)
-        #model.forward_propagation(np.array([[1], [1]]))
-        Training examples usually are given as no_examples x no_features,
-        slides says the opposite. no_features, no_examples, batch_size - find out all shapes
-        Get help with the shapes of the Jacobians, go through each and write down what is needed
-        Bias: should be affected by weights, but the slides don't have incoming weights on them?
-        Regularization: explain
-        model.fit(X, Y)
-         """
+        
 
     elif Menu == 'Create config':
         print('Creating config...')
