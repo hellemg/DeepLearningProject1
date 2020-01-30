@@ -11,6 +11,28 @@ The following imports are OK, and not anything else: numpy, matplotlib.pyplot, c
 sys and softmax from scipy.special. Notice that tanh is available from numpy.
 """
 
+# Preprocessing, and reading from file
+Preprocess = Preprocess()
+"""
+Preprocess.get_config_parameters('config.ini')
+# Data
+train_path = Preprocess.train_path
+dev_path = Preprocess.dev_path
+x_train, y_train = Preprocess.read_dataset(train_path)
+x_dev, y_dev = Preprocess.read_dataset(dev_path)
+# Model
+activation_names = ['relu']
+loss_type_name = 'L2'
+
+hidden_layers = [2, 1]
+activations = [Preprocess.get_activation(name) for name in activation_names]
+loss_type = Preprocess.get_loss_type(loss_type_name)
+# Hyper
+learning_rate = 0.01
+no_epochs = 100
+L2_regularization = 'heihei'
+"""
+
 if __name__ == '__main__':
     Menu = {
         -1: 'Testspace',
@@ -18,22 +40,12 @@ if __name__ == '__main__':
         2: 'Create config',
         3: 'Preprocess',
         4: 'Simple classifier',
-    }[-1]
+    }[1]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
-        Preprocess = Preprocess()
-        Preprocess.get_config_parameters('config.ini')
-        # Data
-        train_path = Preprocess.train_path
-        dev_path = Preprocess.dev_path
-        x_train, y_train = Preprocess.read_dataset(train_path)
-        x_dev, y_dev = Preprocess.read_dataset(dev_path)
-        # Model
-        activation_names = ['relu']
-        loss_type_name = 'L2'
 
-        layers = [2, 1]
+        hidden_layers = [2, 1]
         activations = [Preprocess.get_activation(name) for name in activation_names]
         loss_type = Preprocess.get_loss_type(loss_type_name)
         # Hyper
@@ -51,16 +63,58 @@ if __name__ == '__main__':
         # Make Y a column vector
         Y = Y[:, np.newaxis]
         training_data = np.hstack((X, Y))
+        if loss_type_name == 'L2':
+            num_output_nodes = 1
+        elif loss_type_name == 'cross_entropy':
+            num_output_nodes = max(y_train) + 1
+            y_train = Preprocess.one_hot_encode(num_examples_train, num_output_nodes, y_train)
+            y_dev = Preprocess.one_hot_encode(num_examples_dev, num_output_nodes, y_dev)
 
+        print('-----------------------------')
+        print(X.shape)
         #Define network
-        network = Network(layers[0])
-        for i in range(len(layers)-1):
-            network.add_layer(layers[i+1], activations[i])
+        network = Network(hidden_layers[0])
+        for i in range(len(hidden_layers)-1):
+            network.add_layer(hidden_layers[i+1], activations[i])
         network.compile(learning_rate, loss_type)
         network.train(training_data)
 
     elif Menu == 'Simple nn':
+        print('___ Task 2.1')
+        # Hyper
+        learning_rate = 0.01
+        no_epochs = 100
+        L2_regularization = 'heihei'
+
+        # X from dataset has shape num_examples x num_features
+        # Y from dataset has shape num_examples x 1
+        X = np.array([[1, 1],
+                     [1, 0],
+                     [0, 1],
+                     [0, 0]])
+        Y = np.array([1, 1, 1, 0])
+        # Make Y a column vector
+        Y = Y[:, np.newaxis]
+        training_data = np.hstack((X, Y))
+
+        x_dev = np.array([[1, 1],
+                     [1, 0],
+                     [0, 1],
+                     [0, 0]])
+
+        y_dev = np.array([1, 1, 1, 0])
         
+        # Define network
+        # First layer should have size num_features
+        network = Network(X.shape[1])
+        # Add output layer
+        network.add_layer(1, Preprocess.get_activation('relu'))
+        network.compile(learning_rate, Preprocess.get_loss_type('L2'))
+
+        #Train network
+        network.train(training_data)
+        loss = network.test(x_dev, y_dev)
+        print('-- validation loss:', loss)
 
     elif Menu == 'Create config':
         print('Creating config...')
@@ -80,11 +134,6 @@ if __name__ == '__main__':
         print('Reading config file...')
         Preprocess = Preprocess()
         Preprocess.get_config_parameters('config.ini')
-
-        activation = Preprocess.get_activation('tanh')
-        print(activation)
-        loss_type = Preprocess.get_loss_type('L2')
-        print(loss_type)
 
         path = './DATA/train_small.csv'
         x_train, y_train = Preprocess.read_dataset(path)

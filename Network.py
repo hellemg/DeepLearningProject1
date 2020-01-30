@@ -90,7 +90,7 @@ class Network:
         Y = mini_batch[:, -1][:, np.newaxis]
         # Forward propagation on full minibatch
         self.forward_propagation(X)
-        self.print_layers()
+        #self.print_layers()
         return 0.0000005
         for training_example in mini_batch:
             # Make x column vector
@@ -118,6 +118,8 @@ class Network:
 
         :type x: ndarray of shape num_features x num_examples
         :param x: training examples for one minibatch
+
+        :returns: ndarray of shape num_classes x num_examples, output of neural network
         """
         # print('... forward propagation')
         activated_node = x
@@ -125,13 +127,11 @@ class Network:
         self.activated_nodes = [x]
         self.zs = []  # list to store all the z vectors, layer by layer
         for i, (b, w) in enumerate(zip(self.biases, self.weights_transposed)):
-            print('a:', activated_node)
-            print('w:', w)
             z = np.dot(w, activated_node)+b
             self.zs.append(z)
             activated_node = self.activations[i].gradient(z)
-            print(activated_node.shape)
             self.activated_nodes.append(activated_node)
+        return activated_node
 
     def backpropagate(self, x, y):
         """
@@ -166,6 +166,15 @@ class Network:
         prediction = self.activated_nodes[-1]
         cost = self.loss_type.apply_function(y, prediction)
         return nabla_b, nabla_w, cost
+
+    def test(self, x, y):
+        """
+        Forward propagate x after transpose and get output, check loss
+        :type x: ndarray of shape num_examples x num_features
+        :param y: ndarray of shape num_classes x num_examples
+        """
+        z = self.forward_propagation(x.T)
+        return self.loss_type.apply_function(y, z)/z.shape[1]
 
     def print_layers(self):
         print('--- input nodes ---')

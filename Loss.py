@@ -14,7 +14,7 @@ class Loss:
 
 class CrossEntropy:
     def __init__(self):
-        print('... using crossentropy as loss function')
+        pass
 
     def apply_function(self, y, s):
         """
@@ -48,7 +48,7 @@ class CrossEntropy:
 
 class L2:
     def __init__(self):
-        print('... using L2 as loss function')
+        pass
 
     def apply_function(self, y, z):
         """
