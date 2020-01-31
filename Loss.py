@@ -26,7 +26,8 @@ class CrossEntropy:
         :type s: ndarray of shape num_classe x ,
         :param s: softmax vector
 
-        :returns: scalar cost
+        # TODO: Fix so it returns scalar
+        :returns: ndarray of shape 1 x, - cost
         """
         # Since y is one-hot encoded, we can omit multiplying with it and just use s-values where y=1
         return -np.log(s[np.where(y)])
@@ -35,13 +36,14 @@ class CrossEntropy:
         """
         Return the gradient of cross-entropy of vectors y (target) and s (prediction after softmax)
 
-        :type y: ndarray
+        :type y: ndarray of shape num_classes x ,
         :param y: one-hot vector encoding correct class
 
-        :type s: ndarray
+        :type s: ndarray of shape num_classes x ,
         :param s: softmax vector
 
-        :returns: ndarray of size len(s)
+        # TODO: Fix jacobi
+        :returns: ndarray of shape num_classes x , 
         """
         return -y / s
 
