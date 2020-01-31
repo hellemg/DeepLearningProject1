@@ -29,23 +29,22 @@ class Preprocess:
         self.dev_path = self.config['DATA']['validation']
 
         # Model
-        # Read config-value, split into list based on comma, and remove whitespace and cast to int
+        # Read config-value, split into list based on comma
         layers = self.config['MODEL']['layers'].split(',')
+        # Remove whitespace and cast to int
         self.layers = [int(x.strip(' ')) for x in layers]
         # TODO: if layers[0] == 0, no hidden layers
         self.activations = self.config['MODEL']['activations']
         self.loss_type = self.config['MODEL']['loss_type']
-        """ TODO:
-        Note that in
-        addition to the mentioned functions, you will also need to handle the softmax as part of your
-        implementation to handle the classification-loss (see below).
-        """
 
         # Hyper
         self.learning_rate = self.config['HYPER']['learning_rate']
         self.no_epochs = self.config['HYPER']['no_epochs']
         self.L2_regularization = self.config['HYPER']['L2_regularization']
+
         print('... parameters are set')
+        
+        # Option to print config-values
         if debug:
             print('Sections in config:')
             for section in self.config.sections():
@@ -56,10 +55,13 @@ class Preprocess:
 
     def read_dataset(self, path):
         """
-        input: string, path for dataset to read
-        returns:
-        numpy array of shape no_examples x no_features, examples from dataset
-        numpy array of shape no_examples x 1, labels from dataset
+        Reads the dataset from path
+
+        :type path: string
+        :param path: path to dataset
+        
+        :returns: ndarray of shape no_examples x no_features - examples from dataset
+        :returns: ndarray of shape no_examples x, - labels from dataset
         """
         x = [[]]
         y = []
@@ -73,12 +75,16 @@ class Preprocess:
 
     def one_hot_encode(self, no_examples, no_classes, labels):
         """
-        input:
-        no_examples: int, number of examples
-        no_classes: int, number of classes
-        labels: numpy array of shape no_examples with ints, labels to encode
-        returns:
-        numpy array of shape no_examples, no_classes, one hot encoded label for each examples
+        :type no_examples: int
+        :param no_examples: number of examples in dataset
+        
+        :type no_classes: int
+        :param no_classes: number of classes in target (number of output nodes)
+
+        :type labels: ndarray of shape no_examples x , - contains ints
+        :param labels: target vector - labels to encode
+        
+        :returns: ndarray of shape no_examples x no_classes - one hot encoded label for all examples
         """
         one_hot = np.zeros((no_examples, no_classes))
         # Uses the i'th entry in each array at the same time
