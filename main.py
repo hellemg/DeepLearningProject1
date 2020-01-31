@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
         # Model
         layers = [5, 4, 3]
-        activations = ['relu', 'tanh', 'relu']
+        activations = ['relu', 'tanh', 'linear']
         loss_type = 'L2'
 
         # Hyper
@@ -222,7 +222,7 @@ if __name__ == '__main__':
                       [0, 0]])
         Y = np.array([1, 2, 2, 0])
 
-        # Dev sets        
+        # Dev sets
         x_dev = np.array([[1, 1],
                           [1, 0],
                           [0, 1],
@@ -230,36 +230,42 @@ if __name__ == '__main__':
         y_dev = np.array([1, 1, 1, 0])
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
+        output_activation = {'L2': Preprocess.get_activation('tanh'),
+                             'cross_entropy': Preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
             # One hot encode Y
             Y = Preprocess.one_hot_encode(X.shape[0], num_classes, Y)
-            y_dev = Preprocess.one_hot_encode(x_dev.shape[0], num_classes, y_dev)
+            y_dev = Preprocess.one_hot_encode(
+                x_dev.shape[0], num_classes, y_dev)
         else:
             # Make Y a column vector
             Y = Y[:, np.newaxis]
             y_dev = y_dev[:, np.newaxis]
-        
+
         # Combine X and Y
         training_data = np.hstack((X, Y))
 
         # Define network
-        network = Network(X.shape[1]) # First layer should have size num_features
+        # First layer should have size num_features
+        network = Network(X.shape[1])
         # Add hidden layers
         for i in range(len(layers)):
             layer_size = layers[i]
             activation = Preprocess.get_activation(activations[i])
             network.add_layer(layer_size, activation)
+        network.add_layer(num_classes, output_activation)
         # Compile network
         network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
 
         # Train network
-        # TODO: DONE Forward propagation with x.shape: num_nodes x , 
+        # TODO: DONE Forward propagation with x.shape: num_nodes x ,
         # TODO: BP with the same
-        training_cost = network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
+        training_cost = network.train(
+            training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
         print('--- training cost development:', training_cost)
         # loss = network.test(x_dev, y_dev)
         # print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
-        #write_weights_to_file(network)
+        # write_weights_to_file(network)
