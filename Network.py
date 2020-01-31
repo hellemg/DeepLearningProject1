@@ -167,7 +167,7 @@ class Network:
         # list to store all the activated nodes, layer by layer
         self.activated_nodes = [x]
         self.zs = []  # list to store all the z vectors, layer by layer
-        for i, (b, w) in enumerate(zip(self.biases, self.weights_transposed)):
+        for i in range(len(self.biases)):
             weights = self.weights_transposed[i]
             bias = self.biases[i]
             z = np.dot(weights, activated_node)+bias
