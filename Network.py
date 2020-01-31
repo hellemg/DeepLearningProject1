@@ -85,7 +85,7 @@ class Network:
                 return training_cost
         return training_cost
 
-    def update_mini_batch(self, mini_batch, num_classes):
+    def update_mini_batch(self, mini_batch, num_classes, lbda=0):
         """
         Update weights and biases for all layers by applying gradient descent
         to a mini batch. Both are updated with the average gradient for each
@@ -93,6 +93,9 @@ class Network:
 
         :type mini_batch: ndarray of shape mini_batch_size x num_features+1
         :param mini_batch: inputs to network horizontally stacked with targets
+
+        :type lbda: number
+        :param lbda: regularization constant
 
         :returns: average cost for the minibatch
         """
@@ -105,7 +108,7 @@ class Network:
         X = mini_batch[:, :-num_classes].T
         Y = mini_batch[:, -num_classes:]
         # Forward propagation on full minibatch
-        #self.forward_propagation(X) 
+        # self.forward_propagation(X)
         # self.print_layers()
         for i in range(mini_batch_size):
             # Make x column vector
@@ -124,32 +127,10 @@ class Network:
         # Update all weights and biases with the average gradient
         for hl in range(self.num_layers):
             self.weights_transposed[hl] -= (self.learning_rate *
-                                            nabla_w[hl])/mini_batch_size
+                                            nabla_w[hl])/mini_batch_size 
+                                            + self.learning_rate*self.weights_transposed[hl]
             self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
-
-    def forward_propagation_old(self, x):
-        """
-        Complete forward propagation through all layers of the network.
-        Set zs for all layers, except input layer
-        Set activated_nodes for all layers, first activated_nodes is the input layer
-
-        :type x: ndarray of shape num_features x ,
-        :param x: training examples for one minibatch
-
-        :returns: ndarray of shape num_classes x , (output of neural network)
-        """
-        # print('... forward propagation')
-        activated_node = x
-        # list to store all the activated nodes, layer by layer
-        self.activated_nodes = [x]
-        self.zs = []  # list to store all the z vectors, layer by layer
-        for i, (b, w) in enumerate(zip(self.biases, self.weights_transposed)):
-            z = np.dot(w, activated_node)+b
-            self.zs.append(z)
-            activated_node = self.activations[i].apply_function(z)
-            self.activated_nodes.append(activated_node)
-        return activated_node
 
     def forward_propagation(self, x):
         """
@@ -202,8 +183,8 @@ class Network:
         print('---- all above is ok ---')
         # Update last weight-layer
         previous_a = self.activated_nodes[-2]
-        print('delta:',delta.shape)
-        print('prev a:',previous_a.shape)
+        print('delta:', delta.shape)
+        print('prev a:', previous_a.shape)
         print(self.weights_transposed[-1].shape)
         print(np.dot(delta, previous_a.T))
 
