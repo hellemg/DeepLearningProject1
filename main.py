@@ -205,12 +205,12 @@ if __name__ == '__main__':
         # dev_path
 
         # Model
-        layers = [5, 4, 3]
-        activations = ['relu', 'tanh', 'linear']
+        layers = [0]
+        activations = ['relu']
         loss_type = 'L2'
 
         # Hyper
-        learning_rate = 0.01
+        learning_rate = 0.1
         no_epochs = 10
         L2_regularization = None
 
@@ -227,10 +227,10 @@ if __name__ == '__main__':
                           [1, 0],
                           [0, 1],
                           [0, 0]])
-        y_dev = np.array([1, 1, 1, 0])
+        y_dev = np.array([1, 0, 0, 0])
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': Preprocess.get_activation('tanh'),
+        output_activation = {'L2': Preprocess.get_activation('linear'),
                              'cross_entropy': Preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
@@ -250,10 +250,13 @@ if __name__ == '__main__':
         # First layer should have size num_features
         network = Network(X.shape[1])
         # Add hidden layers
-        for i in range(len(layers)):
-            layer_size = layers[i]
-            activation = Preprocess.get_activation(activations[i])
-            network.add_layer(layer_size, activation)
+        num_hidden_layers = len(layers)
+        if not(num_hidden_layers == 1 and layers[0] ==0):
+            print('adding layers')
+            for i in range(num_hidden_layers):
+                layer_size = layers[i]
+                activation = Preprocess.get_activation(activations[i])
+                network.add_layer(layer_size, activation)
         network.add_layer(num_classes, output_activation)
         # Compile network
         network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
@@ -263,7 +266,9 @@ if __name__ == '__main__':
         # TODO: BP with the same
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
-        print('--- training cost development:', training_cost)
+        print(training_data)
+        print(network.weights_transposed)
+        #print('--- training cost development:', training_cost)
         # loss = network.test(x_dev, y_dev)
         # print('-- validation loss:', loss)
 
