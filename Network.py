@@ -130,30 +130,6 @@ class Network:
             self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
 
-    def forward_propagation(self, x):
-        """
-        Complete forward propagation through all layers of the network.
-        Set zs for all layers, except input layer
-        Set activated_nodes for all layers, first activated_nodes is the input layer
-
-        :type x: ndarray of shape num_features x num_examples(=1)
-        :param x: training examples for one minibatch
-
-        :returns: ndarray of shape num_classes x num_examples, output of neural network
-        """
-        activated_node = x
-        # list to store all the activated nodes, layer by layer
-        self.activated_nodes = [x]
-        self.zs = []  # list to store all the z vectors, layer by layer
-        for i in range(len(self.biases)):
-            weights = self.weights_transposed[i]
-            bias = self.biases[i]
-            z = np.dot(weights, activated_node)+bias
-            self.zs.append(z)
-            activated_node = self.activations[i].apply_function(z)
-            self.activated_nodes.append(activated_node)
-        return activated_node
-
     def backpropagate(self, x, y):
         """
         :type x: ndarray of shape num_features x ,
@@ -196,6 +172,30 @@ class Network:
         prediction = self.activated_nodes[-1]
         cost = self.loss_type.apply_function(y, prediction)
         return nabla_b, nabla_w, cost
+
+    def forward_propagation(self, x):
+        """
+        Complete forward propagation through all layers of the network.
+        Set zs for all layers, except input layer
+        Set activated_nodes for all layers, first activated_nodes is the input layer
+
+        :type x: ndarray of shape num_features x num_examples(=1)
+        :param x: training examples for one minibatch
+
+        :returns: ndarray of shape num_classes x num_examples, output of neural network
+        """
+        activated_node = x
+        # list to store all the activated nodes, layer by layer
+        self.activated_nodes = [x]
+        self.zs = []  # list to store all the z vectors, layer by layer
+        for i in range(len(self.biases)):
+            weights = self.weights_transposed[i]
+            bias = self.biases[i]
+            z = np.dot(weights, activated_node)+bias
+            self.zs.append(z)
+            activated_node = self.activations[i].apply_function(z)
+            self.activated_nodes.append(activated_node)
+        return activated_node
 
     def test(self, x, y):
         """
