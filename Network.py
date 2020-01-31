@@ -230,21 +230,17 @@ class Network:
         return nabla_b, nabla_w, cost
 
     def test(self, x, y):
-        print('___ testing')
         """
         Forward propagate x after transpose and get output, check loss
         :type x: ndarray of shape num_examples x num_features
         :param y: ndarray of shape num_classes x num_examples
         """
-        # TODO: Fix test
         validation_loss = 0
-        for x_ex in x:
-            z = self.forward_propagation(x_ex)
-            validation_loss += self.loss_type.apply_function(y.T, z)
-            print(z)
-            print(y.T)
-            print()
-        return validation_loss/x.shape[0]
+        num_examples = len(x)
+        for i in range(num_examples):
+            z = self.forward_propagation(x[i])
+            validation_loss += self.loss_type.apply_function(y[i], z)
+        return validation_loss/num_examples
 
     def print_layers(self):
         print('--- input nodes ---')
