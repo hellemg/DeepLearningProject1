@@ -210,8 +210,8 @@ if __name__ == '__main__':
         loss_type = 'L2'
 
         # Hyper
-        learning_rate = 0.1
-        no_epochs = 10
+        learning_rate = 0.05
+        no_epochs = 100
         L2_regularization = None
 
         # X from dataset has shape num_examples x num_features
@@ -223,11 +223,11 @@ if __name__ == '__main__':
         Y = np.array([1, 2, 2, 0])
 
         # Dev sets
-        x_dev = np.array([[1, 1],
-                          [1, 0],
-                          [0, 1],
-                          [0, 0]])
-        y_dev = np.array([1, 0, 0, 0])
+        x_dev = np.array([[1, 1]])#,
+                        #   [1, 0],
+                        #   [0, 1],
+                        #   [0, 0]])
+        y_dev = np.array([1])#, 0, 0, 0])
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
         output_activation = {'L2': Preprocess.get_activation('linear'),
@@ -264,10 +264,9 @@ if __name__ == '__main__':
         # Train network
         # TODO: DONE Forward propagation with x.shape: num_nodes x ,
         # TODO: BP with the same
+        print('training data:',training_data)
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
-        print(training_data)
-        print(network.weights_transposed)
         #print('--- training cost development:', training_cost)
         # loss = network.test(x_dev, y_dev)
         # print('-- validation loss:', loss)

@@ -13,6 +13,7 @@ class Network:
         self.activations = []
         self.learning_rate = None
         self.loss_type = None
+        # Number of hidden layers + 1 (for the output layer)
         self.num_layers = None
         self.biases = None
         self.weights_transposed = None
@@ -119,11 +120,14 @@ class Network:
                 nabla_b[r] += delta_nabla_b[r]
             mini_batch_cost += training_example_cost
         # Update all weights and biases with the average gradient
+        # self.weights_transposed = [w-(self.learning_rate/len(mini_batch))*nw
+        #                 for w, nw in zip(self.weights_transposed, nabla_w)]
+        # self.biases = [b-(self.learning_rate/len(mini_batch))*nb
+        #                for b, nb in zip(self.biases, nabla_b)]
         for hl in range(self.num_layers):
-            self.weights_transposed[hl] += (self.learning_rate * nabla_w[hl]) / \
-                mini_batch_size + self.learning_rate * \
-                self.weights_transposed[hl]
-            self.biases[hl] += (self.learning_rate*nabla_b[hl])/mini_batch_size
+            self.weights_transposed[hl] -= (self.learning_rate * nabla_w[hl]) / \
+                mini_batch_size
+            self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
         return mini_batch_cost/len(mini_batch)
 
     def forward_propagation(self, x):
@@ -184,7 +188,7 @@ class Network:
         for l in range(2, self.num_layers+1):
             activation_gradient = self.activations[-l].gradient(self.zs[-l])
             # TODO: Check that this is ok
-            layer_gradient=np.dot(self.weights_transposed[-l+1].T, delta)
+            layer_gradient = np.dot(self.weights_transposed[-l+1].T, delta)
             delta = np.multiply(layer_gradient, activation_gradient)
             nabla_b[-l] = delta
             previous_a = self.activated_nodes[-l-1]
@@ -219,3 +223,21 @@ class Network:
             print(self.zs[i])
             print('--- activated nodes ---')
             print(self.activated_nodes[i+1])
+
+    def backpropagate_jacobi(self, x, y):
+        # Empty arrays to hold changes in each layer
+        nabla_b = [np.zeros_like(b) for b in self.biases]
+        nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
+        # Forward propagation
+        output_layer = self.forward_propagation(x)
+        # Change in loss by change in output layer (L by Z, L by S for softmax)
+        J_loss_by_layer = self.loss_type.gradient(y, output_layer)
+        previous_a = self.activated_nodes[0]
+        current_a = self.activated_nodes[1]
+        J_layer_by_sum = np.multiply(np.identity(
+            len(current_a)), self.activations[0].gradient(current_a))
+        J_layer_by_weights = np.outer(previous_a, np.diag(J_layer_by_sum))
+        nabla_w[0] = J_layer_by_weights.T
+
+        output_errors = self.loss_type.apply_function(y, output_layer)
+        return nabla_b, nabla_w, output_errors
