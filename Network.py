@@ -86,13 +86,61 @@ class Network:
                 return training_cost
         return training_cost
 
+    def backpropagate_batch(self, mini_batch, num_classes, lbda=0):
+        """
+        Update weights and biases for all layers by applying gradient descent
+        to a mini batch.
+
+        :type mini_batch: ndarray of shape mini_batch_size x num_features+num_classes
+        :param mini_batch: training data to network - inputs horizontally stacked with targets
+
+        :type lbda: number
+        :param lbda: regularization constant
+
+        :returns: average cost for the minibatch
+        """
+        # Get X (num_examples x num_features)
+        X = mini_batch[:, :-num_classes]
+        # Get Y (num_examples x num_classes)
+        Y = mini_batch[:, -num_classes:]
+        # TODO: Probably need to transpose X and Y, update comment with shapes
+        output_layer = self.forward_propagation(X)
+        loss_by_output_layer = self.loss_type.gradient(Y, output_layer)
+        # TODO: Check shape of loss_by_layer, ensure that gradient methods outputs correct shape
+        # TODO: Add softmax-layer
+        mini_batch_size = 20
+        # TODO: Add mini_batch_size after transposing X
+        self.jacobi_iteration(loss_by_output_layer, self.num_layers-1, mini_batch_size)
+        # Return the loss
+        # TODO: Check shape of loss, sum and divide by mini_batch_size if necessary
+        return self.loss_type.apply_function(self.activated_nodes[-1])
+
+    def jacobi_iteration(self, loss_by_layer, layer_depth, mini_batch_size):
+        """
+        Updates all weights and biases in the network by Jacobi iteration.
+
+        :type loss_by_layer: ndarray of shape mini_batch_size x num_classes
+        :param loss_by_layer: change of loss in the output as a function of change in a layers nodes(??)
+
+        :type layer_depth: int
+        :param layer_depth: current layer in the network, 0 corresponds to updating first weights
+        """
+        if layer_depth == 0:
+            # TODO: layer_by_weights = self.activated_nodes[0] outer self.activations[0].gradient()
+            # TODO: loss_by_weights = loss_by_layer x layer_by_weights
+            # TODO: self.weights_transposed[0] -= self.learning_rate*loss_by_weights/mini_batch_size
+            # TODO: self.biases[0] -= ....
+        else:
+            # ALl of the above?
+            # TODO: layer_by_layer
+
     def update_mini_batch(self, mini_batch, num_classes, lbda=0):
         """
         Update weights and biases for all layers by applying gradient descent
         to a mini batch. Both are updated with the average gradient for each
         training example.
 
-        :type mini_batch: ndarray of shape mini_batch_size x num_features+1
+        :type mini_batch: ndarray of shape mini_batch_size x num_features+num_classes
         :param mini_batch: inputs to network horizontally stacked with targets
 
         :type lbda: number
