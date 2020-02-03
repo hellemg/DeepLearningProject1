@@ -43,91 +43,13 @@ def write_weights_to_file(neural_network, path='somefile.txt'):
 if __name__ == '__main__':
     Menu = {
         -1: 'Testspace',
-        1: 'Minimalist example for regression',
         2: 'Create config',
         3: 'Preprocess',
-        4: 'Minimalist example for classification',
         5: 'Arbitrary NN',
     }[5]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
-
-        hidden_layers = [2, 1]
-        activations = [Preprocess.get_activation(
-            name) for name in activation_names]
-        loss_type = Preprocess.get_loss_type(loss_type_name)
-        # Hyper
-        learning_rate = 0.01
-        no_epochs = 100
-        L2_regularization = 'heihei'
-
-        # X from dataset has shape no_examples x no_features
-        # Y from dataset has shape no_examples x 1
-        X = np.array([[1, 1],
-                      [1, 0],
-                      [0, 1],
-                      [0, 0]])
-        Y = np.array([1, 1, 1, 0])
-        # Make Y a column vector
-        Y = Y[:, np.newaxis]
-        training_data = np.hstack((X, Y))
-        if loss_type_name == 'L2':
-            num_output_nodes = 1
-        elif loss_type_name == 'cross_entropy':
-            num_output_nodes = max(y_train) + 1
-            y_train = Preprocess.one_hot_encode(
-                num_examples_train, num_output_nodes, y_train)
-            y_dev = Preprocess.one_hot_encode(
-                num_examples_dev, num_output_nodes, y_dev)
-
-        print('-----------------------------')
-        print(X.shape)
-        # Define network
-        network = Network(hidden_layers[0])
-        for i in range(len(hidden_layers)-1):
-            network.add_layer(hidden_layers[i+1], activations[i])
-        network.compile(learning_rate, loss_type)
-        network.train(training_data)
-
-    elif Menu == 'Minimalist example for regression':
-        print('___ Task 2.1')
-        # Hyper
-        learning_rate = 0.01
-        no_epochs = 100
-
-        # X from dataset has shape num_examples x num_features
-        # Y from dataset has shape num_examples x 1
-        X = np.array([[1, 1],
-                      [1, 0],
-                      [0, 1],
-                      [0, 0]])
-        Y = np.array([1, 1, 1, 0])
-        # Make Y a column vector
-        Y = Y[:, np.newaxis]
-        training_data = np.hstack((X, Y))
-
-        x_dev = np.array([[1, 1],
-                          [1, 0],
-                          [0, 1],
-                          [0, 0]])
-
-        y_dev = np.array([1, 1, 1, 0])
-        # Define network
-        # First layer should have size num_features
-        network = Network(X.shape[1])
-        # Add output layer
-        network.add_layer(1, Preprocess.get_activation('relu'))
-        network.compile(learning_rate, Preprocess.get_loss_type('L2'))
-
-        # Train network
-        training_cost = network.train(training_data)
-        print('--- training cost development:', training_cost)
-        loss = network.test(x_dev, y_dev)
-        print('-- validation loss:', loss)
-
-        # Dump weights (transposed) to file
-        write_weights_to_file(network)
 
     elif Menu == 'Create config':
         print('Creating config...')
@@ -154,51 +76,6 @@ if __name__ == '__main__':
         no_classes = max(y_train) + 1
         one_hot = Preprocess.one_hot_encode(no_examples, no_classes, y_train)
 
-    elif Menu == 'Minimalist example for classification':
-        print('___ Task 2.2')
-        # Hyper
-        learning_rate = 0.01
-        no_epochs = 100
-
-        # X from dataset has shape num_examples x num_features
-        # Y from dataset has shape num_examples x 1
-        X = np.array([[1, 1],
-                      [1, 0],
-                      [0, 1],
-                      [0, 0]])
-        Y = np.array([1, 2, 2, 0])
-
-        num_output_nodes = Y.max()+1
-        Y = Preprocess.one_hot_encode(X.shape[0], num_output_nodes, Y)
-
-        # Make Y a column vector
-        #Y = Y[:, np.newaxis]
-        training_data = np.hstack((X, Y))
-
-        x_dev = np.array([[1, 1],
-                          [1, 0],
-                          [0, 1],
-                          [0, 0]])
-
-        y_dev = np.array([1, 1, 1, 0])
-        # Define network
-        # First layer should have size num_features
-        network = Network(X.shape[1])
-        # Add output layer
-        network.add_layer(num_output_nodes,
-                          Preprocess.get_activation('softmax'))
-        network.compile(
-            learning_rate, Preprocess.get_loss_type('cross_entropy'))
-
-        # Train network
-        training_cost = network.train(training_data, num_output_nodes)
-        print('--- training cost development:', training_cost)
-        loss = network.test(x_dev, y_dev)
-        print('-- validation loss:', loss)
-
-        # Dump weights (transposed) to file
-        write_weights_to_file(network)
-
     elif Menu == 'Arbitrary NN':
         # Data
         # train_path
@@ -206,12 +83,12 @@ if __name__ == '__main__':
 
         # Model
         layers = [2]
-        activations = ['relu']
-        loss_type = 'L2'
+        activations = ['tanh']
+        loss_type = 'cross_entropy'
 
         # Hyper
-        learning_rate = 8e-2
-        no_epochs = 5000
+        learning_rate = 8e-1
+        no_epochs = 100
         L2_regularization = None
 
         # X from dataset has shape num_examples x num_features
@@ -220,7 +97,7 @@ if __name__ == '__main__':
                       [1, 0],
                       [0, 1],
                       [0, 0]])
-        Y = np.array([1, 0, 0, 0])
+        Y = np.array([1, 1, 1, 0])
 
         # Dev sets
         x_dev = np.array([[1, 1]])  # ,
@@ -262,15 +139,12 @@ if __name__ == '__main__':
         network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
 
         # Train network
-        # TODO: DONE Forward propagation with x.shape: num_nodes x ,
-        # TODO: BP with the same
         print('training data:', training_data)
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
-        print('--- training cost development:', training_cost)
-        print(network.activated_nodes[-1])
-        # loss = network.test(x_dev, y_dev)
-        # print('-- validation loss:', loss)
+        #print('--- training cost development:', training_cost)
+        loss = network.test(x_dev, y_dev)
+        print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
         # write_weights_to_file(network)

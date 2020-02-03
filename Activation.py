@@ -112,16 +112,16 @@ class Softmax(Activation):
         """
         Return the Softmax of vector z, protected against under/overflow
 
-        :type z: ndarray
-        :param z: vector input
+        :type z: ndarray of shape num_classes x num_examples
+        :param z: vector input 
 
-        :returns: ndarray of same length as z
+        :returns: ndarray of shape num_classes x num_examples
         """
         z = z - np.max(z)
         exps = np.exp(z)
         return exps/np.sum(exps)
 
-    def gradient(self, s):
+    def jacobian(self, s):
         """
         Returns the Jacobian of the Softmax vector s
 
@@ -132,14 +132,19 @@ class Softmax(Activation):
         """
         return np.diag(s) - np.outer(s, s)
 
-    def jacobian(self, z):
+    def gradient(self, z):
         """
         Returns the jacobian of vector z, protected against under/overflow
 
-        :type z: ndarray
+        :type z: ndarray of shape num_classes x num_examples
         :param z: vector input
 
-        :returns: ndarray of shape (len(z), len(z))
+        :returns: ndarray of shape num_classes x num_classes x num_examples
         """
         s = self.apply_function(z)
-        return self.gradient(s)
+        num_classes = s.shape[0]
+        jacobian_tensor = np.reshape(self.jacobian(s[:,0]),(1,num_classes,num_classes))
+        for i in range(1,s.shape[1]):
+            jacobian = np.reshape(self.jacobian(s[:,i]), (1,num_classes,num_classes))
+            jacobian_tensor = np.append(jacobian_tensor, jacobian, axis=0)
+        return jacobian_tensor

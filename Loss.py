@@ -23,31 +23,31 @@ class CrossEntropy:
         """
         Return the cross-entropy loss of vectors y (target) and s (prediction)
 
-        :type y: ndarray of shape num_classe x ,
+        :type y: ndarray of shape num_classe x num_examples
         :param y: one-hot vector encoding correct class
 
-        :type s: ndarray of shape num_classe x ,
+        :type s: ndarray of shape num_classe x num_examples
         :param s: softmax vector
 
-        # TODO: Fix so it returns scalar
-        :returns: ndarray of shape 1 x, - cost
+        :returns: scalar - cost
         """
         # Since y is one-hot encoded, we can omit multiplying with it and just use s-values where y=1
-        return -np.log(s[np.where(y)])
+        print('loss in af:',np.sum(-np.log(s[np.where(y)]))/s.shape[1])
+        return np.sum(-np.log(s[np.where(y)]))/s.shape[1]
 
     def gradient(self, y, s):
         """
         Return the gradient of cross-entropy of vectors y (target) and s (prediction after softmax)
 
-        :type y: ndarray of shape num_classes x ,
+        :type y: ndarray of shape num_classes x num_examples
         :param y: one-hot vector encoding correct class
 
-        :type s: ndarray of shape num_classes x ,
+        :type s: ndarray of shape num_classes x num_examples
         :param s: softmax vector
 
-        # TODO: Fix jacobi
-        :returns: ndarray of shape num_classes x , 
+        :returns: ndarray of shape num_classes x num_examples
         """
+        print('_________ loss gradient', y.shape, s.shape, (-y/s).shape)
         return -y / s
 
 
