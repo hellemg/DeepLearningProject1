@@ -103,7 +103,6 @@ class Network:
 
         :returns: average cost for the minibatch
         """
-        print('... welcome to BP batch')
         # Get X (num_features x num_examples)
         X = mini_batch[:, :-num_classes].T
         # Get Y (num_classes x num_examples)
@@ -114,7 +113,7 @@ class Network:
         self.backpropagate_output(
             loss_by_output_layer, self.num_layers-1, mini_batch_size, lbda)
         # Return the loss
-        self.print_layers()
+        #self.print_layers()
         return self.loss_type.apply_function(Y, self.activated_nodes[-1])
 
     def backpropagate_output(self, loss_by_output_layer, layer_depth, mini_batch_size, lbda):
@@ -123,45 +122,45 @@ class Network:
         """
         if isinstance(self.activations[-1], Softmax):
             loss_by_output_layer = loss_by_output_layer.T
-            print('loss by output layer:', loss_by_output_layer.shape)
+            # print('loss by output layer:', loss_by_output_layer.shape)
             # num_examples x num_classes x 1
             loss_by_output_layer = np.reshape(
                 loss_by_output_layer, (mini_batch_size, loss_by_output_layer.shape[1], 1))
-            print('loss_by_output_layer', loss_by_output_layer.shape)
+            # print('loss_by_output_layer', loss_by_output_layer.shape)
             # num_examples x num_classes x num_classes
             softmax_by_layer = self.activations[-1].gradient(
                 self.activated_nodes[-1])
-            print('softmax_by_layer', softmax_by_layer.shape)
+            # print('softmax_by_layer', softmax_by_layer.shape)
             # num_examples x num_classes x 1
             loss_by_output_layer = softmax_by_layer @ loss_by_output_layer
-            print('loss by output layer:', loss_by_output_layer.shape)
+            # print('loss by output layer:', loss_by_output_layer.shape)
             # num_examples x num_classes x num_classes
             layer_by_sum = self.activations[-1].gradient(self.zs[-1])
-            print('layer by sum:', layer_by_sum.shape)
+            # print('layer by sum:', layer_by_sum.shape)
             # num_examples x num_classes
             loss_by_sum = np.reshape(
                 layer_by_sum @ loss_by_output_layer, (mini_batch_size, layer_by_sum.shape[1]))
-            print('loss by sum:', loss_by_sum.shape)
+            # print('loss by sum:', loss_by_sum.shape)
             # num_classes_prev x num_examples
             sum_by_weights = self.activated_nodes[-2]
-            print('sum_by_weights', sum_by_weights.shape)
+            # print('sum_by_weights', sum_by_weights.shape)
             # num_classes x num_classes_prev
             loss_by_weights = (
                 (sum_by_weights @ loss_by_sum)/mini_batch_size).T
-            print('loss_by_weights', loss_by_weights.shape)
-            print('weights:', self.weights_transposed[layer_depth].shape)
+            # print('loss_by_weights', loss_by_weights.shape)
+            # print('weights:', self.weights_transposed[layer_depth].shape)
             self.weights_transposed[layer_depth] -= self.learning_rate * \
                 (loss_by_weights/mini_batch_size + lbda)
-            print(np.sum(loss_by_sum.T, axis=1, keepdims=True).shape)
-            print('biases:', self.biases[layer_depth].shape)
+            # print(np.sum(loss_by_sum.T, axis=1, keepdims=True).shape)
+            # print('biases:', self.biases[layer_depth].shape)
             self.biases[layer_depth] -= self.learning_rate * \
                 np.sum(loss_by_sum.T, axis=1, keepdims=True) / \
                 mini_batch_size
             if layer_depth != 0:
                 connecting_weights = self.weights_transposed[layer_depth]
                 # Calculate new loss_by_layer to send into next round
-                print('connecting_weights', connecting_weights.shape)
-                print('loss_by_sum', loss_by_sum.shape)
+                # print('connecting_weights', connecting_weights.shape)
+                # print('loss_by_sum', loss_by_sum.shape)
                 loss_by_layer = connecting_weights.T @ loss_by_sum.T
                 self.jacobi_iteration(
                     loss_by_layer, layer_depth-1, mini_batch_size, lbda)
@@ -185,38 +184,38 @@ class Network:
         :type lbda: float
         :param lbda: regularization constant
         """
-        print('loss by layer', loss_by_layer.shape)
-        print('going into last weights')
-        print('layer_depth', layer_depth)
+        # print('loss by layer', loss_by_layer.shape)
+        # print('going into last weights')
+        # print('layer_depth', layer_depth)
         # num_classes x num_examples
         layer_by_sum = self.activations[layer_depth].gradient(
             self.zs[layer_depth])
-        print(layer_by_sum.shape)
+        # print(layer_by_sum.shape)
         # num_classes x num_examples
         loss_by_sum = loss_by_layer * layer_by_sum
-        print(loss_by_sum.shape)
+        # print(loss_by_sum.shape)
         # num_classes_prev x num_examples
         sum_by_weights = self.activated_nodes[layer_depth]
-        print('sum by weights', sum_by_weights.shape)
+        # print('sum by weights', sum_by_weights.shape)
         # num_classes x num_classes_prev
         loss_by_weights = (
             (loss_by_sum) @ sum_by_weights.T)/mini_batch_size
-        print(loss_by_weights.shape)
-        print(self.weights_transposed[layer_depth].shape)
-        print(self.biases[layer_depth].shape)
-        print(np.sum(loss_by_sum, axis=1, keepdims=True).shape)
+        # print(loss_by_weights.shape)
+        # print(self.weights_transposed[layer_depth].shape)
+        # print(self.biases[layer_depth].shape)
+        # print(np.sum(loss_by_sum, axis=1, keepdims=True).shape)
         self.weights_transposed[layer_depth] -= self.learning_rate * \
             (loss_by_weights/mini_batch_size + lbda)
         self.biases[layer_depth] -= self.learning_rate * \
             np.sum(loss_by_sum, axis=1, keepdims=True)/mini_batch_size
         if layer_depth != 0:
-            print('going into a layer')
+            # print('going into a layer')
             connecting_weights = self.weights_transposed[layer_depth]
             # Calculate new loss_by_layer to send into next round
             loss_by_layer = connecting_weights.T @ loss_by_sum
-            print('connecting_weights', connecting_weights.shape)
-            print('loss_by_sum', loss_by_sum.shape)
-            print('next loss by layer:', loss_by_layer.shape)
+            # print('connecting_weights', connecting_weights.shape)
+            # print('loss_by_sum', loss_by_sum.shape)
+            # print('next loss by layer:', loss_by_layer.shape)
             self.jacobi_iteration(
                 loss_by_layer, layer_depth-1, mini_batch_size, lbda)
 
