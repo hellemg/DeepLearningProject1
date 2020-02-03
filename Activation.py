@@ -42,10 +42,24 @@ class ReLU(Activation):
         return 1*(z > 0)
 
 
+class Step(Activation):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return 'Step'
+
+    def apply_function(self, z):
+        treshold = 0.5
+        return 1*(z>treshold)
+
+    def gradient(self, z):
+        return np.ones_like(z)
+
 class Linear(Activation):
     def __init__(self):
         super().__init__()
-    
+
     def __str__(self):
         return 'Linear'
 
@@ -101,6 +115,7 @@ class TanH(Activation):
         """
         return (np.cosh(z))**(-2)
 
+
 class Softmax(Activation):
     def __init__(self):
         super().__init__()
@@ -143,8 +158,10 @@ class Softmax(Activation):
         """
         s = self.apply_function(z)
         num_classes = s.shape[0]
-        jacobian_tensor = np.reshape(self.jacobian(s[:,0]),(1,num_classes,num_classes))
-        for i in range(1,s.shape[1]):
-            jacobian = np.reshape(self.jacobian(s[:,i]), (1,num_classes,num_classes))
+        jacobian_tensor = np.reshape(self.jacobian(
+            s[:, 0]), (1, num_classes, num_classes))
+        for i in range(1, s.shape[1]):
+            jacobian = np.reshape(self.jacobian(
+                s[:, i]), (1, num_classes, num_classes))
             jacobian_tensor = np.append(jacobian_tensor, jacobian, axis=0)
         return jacobian_tensor

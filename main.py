@@ -82,23 +82,23 @@ if __name__ == '__main__':
         print(dev_path)
 
         # Model
-        layers = [3]
-        activations = ['tanh']
-        loss_type = 'cross_entropy'
+        layers = [0]
+        activations = ['relu']
+        loss_type = 'L2'
 
         # Hyper
-        learning_rate = 8e-1
-        no_epochs = 100
+        learning_rate = 8e-3
+        no_epochs = 10
         L2_regularization = None
 
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
-        # X = np.array([[1, 1],
-        #               [1, 0],
-        #               [0, 1],
-        #               [0, 0]])
-        # Y = np.array([1, 1, 1, 0])
-        X, Y = Preprocess.read_dataset(train_path)
+        X = np.array([[1, 1],
+                       [1, 0],
+                       [0, 1],
+                       [0, 0]])
+        Y = np.array([1, 1, 1, 0])
+        #X, Y = Preprocess.read_dataset(train_path)
 
         # Dev sets
         #x_dev = np.array([[1, 1]])  # ,
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         x_dev, y_dev = Preprocess.read_dataset(dev_path)
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': Preprocess.get_activation('tanh'),
+        output_activation = {'L2': Preprocess.get_activation('step'),
                              'cross_entropy': Preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
@@ -146,8 +146,8 @@ if __name__ == '__main__':
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
         print('--- training cost development:', training_cost)
-        loss = network.test(x_dev, y_dev)
-        print('-- validation loss:', loss)
+        #loss = network.test(x_dev, y_dev)
+        #print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
         # write_weights_to_file(network)

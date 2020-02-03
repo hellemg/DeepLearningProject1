@@ -43,7 +43,7 @@ class Preprocess:
         self.L2_regularization = self.config['HYPER']['L2_regularization']
 
         print('... parameters are set')
-        
+
         # Option to print config-values
         if debug:
             print('Sections in config:')
@@ -59,7 +59,7 @@ class Preprocess:
 
         :type path: string
         :param path: path to dataset
-        
+
         :returns: ndarray of shape no_examples x no_features - examples from dataset
         :returns: ndarray of shape no_examples x, - labels from dataset
         """
@@ -77,13 +77,13 @@ class Preprocess:
         """
         :type no_examples: int
         :param no_examples: number of examples in dataset
-        
+
         :type no_classes: int
         :param no_classes: number of classes in target (number of output nodes)
 
         :type labels: ndarray of shape no_examples x , - contains ints
         :param labels: target vector - labels to encode
-        
+
         :returns: ndarray of shape no_examples x no_classes - one hot encoded label for all examples
         """
         one_hot = np.zeros((no_examples, no_classes))
@@ -102,8 +102,9 @@ class Preprocess:
         :returns: subclass of Activation
         """
         return {'relu': ReLU(), 'linear': Linear(),
-                       'tanh': TanH(), 'softmax': Softmax()}[name]
-    
+                'tanh': TanH(), 'softmax': Softmax(),
+                'step': Step()}[name]
+
     def get_loss_type(self, name):
         """
         Return the correct class of loss function given by name
