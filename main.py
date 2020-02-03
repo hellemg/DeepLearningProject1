@@ -82,7 +82,7 @@ if __name__ == '__main__':
         # dev_path
 
         # Model
-        layers = [2]
+        layers = [3]
         activations = ['tanh']
         loss_type = 'cross_entropy'
 

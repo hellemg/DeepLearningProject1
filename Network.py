@@ -113,19 +113,6 @@ class Network:
         loss_by_output_layer = self.loss_type.gradient(Y, output_layer)
         self.backpropagate_output(
             loss_by_output_layer, self.num_layers-1, mini_batch_size, lbda)
-        return self.loss_type.apply_function(Y, self.activated_nodes[-1])
-        # TODO: Add softmax-layer
-        if isinstance(self.activations[-1], Softmax):
-            print(loss_by_output_layer.shape)
-            loss_by_output_layer = loss_by_output_layer.T
-            loss_by_softmax = np.reshape(
-                loss_by_output_layer, (loss_by_output_layer.shape[0], loss_by_output_layer.shape[1], 1))
-            softmax_by_layer = self.activations[-1].gradient(
-                self.activated_nodes[-1])
-            loss_by_output_layer = np.reshape(
-                softmax_by_layer @ loss_by_softmax, (softmax_by_layer.shape[0], softmax_by_layer.shape[1]))
-        self.jacobi_iteration(loss_by_output_layer,
-                              self.num_layers-1, mini_batch_size, lbda)
         # Return the loss
         self.print_layers()
         return self.loss_type.apply_function(Y, self.activated_nodes[-1])
@@ -139,7 +126,7 @@ class Network:
             print('loss by output layer:', loss_by_output_layer.shape)
             # num_examples x num_classes x 1
             loss_by_output_layer = np.reshape(
-                loss_by_output_layer, (loss_by_output_layer.shape[0], loss_by_output_layer.shape[1], 1))
+                loss_by_output_layer, (mini_batch_size, loss_by_output_layer.shape[1], 1))
             print('loss_by_output_layer', loss_by_output_layer.shape)
             # num_examples x num_classes x num_classes
             softmax_by_layer = self.activations[-1].gradient(
@@ -201,17 +188,17 @@ class Network:
         print('loss by layer', loss_by_layer.shape)
         print('going into last weights')
         print('layer_depth', layer_depth)
-        # c x n array
+        # num_classes x num_examples
         layer_by_sum = self.activations[layer_depth].gradient(
             self.zs[layer_depth])
         print(layer_by_sum.shape)
-        # c x n array
+        # num_classes x num_examples
         loss_by_sum = loss_by_layer * layer_by_sum
         print(loss_by_sum.shape)
-        # c x n array
+        # num_classes_prev x num_examples
         sum_by_weights = self.activated_nodes[layer_depth]
         print('sum by weights', sum_by_weights.shape)
-        # n x n array
+        # num_classes x num_classes_prev
         loss_by_weights = (
             (loss_by_sum) @ sum_by_weights.T)/mini_batch_size
         print(loss_by_weights.shape)
