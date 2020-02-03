@@ -16,6 +16,9 @@ class CrossEntropy:
     def __init__(self):
         pass
 
+    def __str__(self):
+        return 'Crossentropy'
+
     def apply_function(self, y, s):
         """
         Return the cross-entropy loss of vectors y (target) and s (prediction)
@@ -52,6 +55,9 @@ class L2:
     def __init__(self):
         pass
 
+    def __str__(self):
+        return 'L2'
+
     def apply_function(self, y, z):
         """
         Return the L2 loss of vectors y (target) and z (prediction)
@@ -64,12 +70,12 @@ class L2:
 
         :returns: scalar cost
         """
-        output_size = len(z)
-        return np.sum((y-z)**2)/output_size
+        output_size = z.shape[1]
+        return np.sum((z-y)**2)/output_size
 
     def gradient(self, y, z):
         """
-        Return the gradient of L2 of vectors y (target) and z (prediction)
+        Return the gradient of L2 of vectors y (target) and z (prediction) divided by batch_size
 
         :type y: ndarray of shape num_output_nodes x 1
         :param y: vector with target-values
@@ -79,5 +85,5 @@ class L2:
 
         :returns: ndarray of size num_output_nodes x num_examples
         """
-        output_size = len(z)
-        return 2*(y - z)/output_size
+        output_size = z.shape[1]
+        return 2*(z - y)/output_size

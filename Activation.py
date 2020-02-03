@@ -16,6 +16,9 @@ class ReLU(Activation):
     def __init__(self):
         super().__init__()
 
+    def __str__(self):
+        return 'ReLU'
+
     def apply_function(self, z):
         """
         Return the ReLU of vector z
@@ -42,6 +45,9 @@ class ReLU(Activation):
 class Linear(Activation):
     def __init__(self):
         super().__init__()
+    
+    def __str__(self):
+        return 'Linear'
 
     def apply_function(self, z):
         """
@@ -70,6 +76,9 @@ class TanH(Activation):
     def __init__(self):
         super().__init__()
 
+    def __str__(self):
+        return 'TanH'
+
     def apply_function(self, z):
         """
         Return the TanH of vector z
@@ -95,6 +104,9 @@ class TanH(Activation):
 class Softmax(Activation):
     def __init__(self):
         super().__init__()
+
+    def __str__(self):
+        return 'Softmax'
 
     def apply_function(self, z):
         """

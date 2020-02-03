@@ -42,6 +42,11 @@ class Network:
         self.learning_rate = learning_rate
         self.loss_type = loss_type
         self.num_layers = len(self.biases)
+        print('Using loss:', self.loss_type)
+        print('Using activations:')
+        for i in range(self.num_layers):
+            print(self.activations[i])
+        print('# hidden layers + output layer:', self.num_layers)
 
     def initialize_weights_and_biases(self):
         """
@@ -53,7 +58,8 @@ class Network:
         :type weights: list of ndarrays, each ndarray is num_nodes x num_nodes_prevlayer
         """
         np.random.seed(42)
-        self.biases = [np.random.randn(y) for y in self.layer_sizes[1:]]
+        #self.biases = [np.random.randn(y) for y in self.layer_sizes[1:]]
+        self.biases = [np.zeros((y,1)) for y in self.layer_sizes[1:]]
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
@@ -76,8 +82,8 @@ class Network:
                             for i in range(0, n, mini_batch_size)]
             # Train over each minibatch
             for mini_batch in mini_batches:
-                mini_batch_cost = self.update_mini_batch(
-                    mini_batch, num_classes)
+                mini_batch_cost = self.backpropagate_batch(mini_batch, 1)
+                # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
                 training_cost.append(mini_batch_cost)
             print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
             # If mini_batch_size=1, this needs to bed removed
@@ -99,23 +105,22 @@ class Network:
 
         :returns: average cost for the minibatch
         """
-        # Get X (num_examples x num_features)
-        X = mini_batch[:, :-num_classes]
-        # Get Y (num_examples x num_classes)
-        Y = mini_batch[:, -num_classes:]
-        # TODO: Probably need to transpose X and Y, update comment with shapes
+        print('... welcome to BP batch')
+        # Get X (num_features x num_examples)
+        X = mini_batch[:, :-num_classes].T
+        # Get Y (num_classes x num_examples)
+        Y = mini_batch[:, -num_classes:].T
+        # TODO: DONE Probably need to transpose X and Y, update comment with shapes
         output_layer = self.forward_propagation(X)
         loss_by_output_layer = self.loss_type.gradient(Y, output_layer)
-        # TODO: Check shape of loss_by_layer, ensure that gradient methods outputs correct shape
         # TODO: Add softmax-layer
-        mini_batch_size = 20
-        # TODO: Add mini_batch_size after transposing X
-        self.jacobi_iteration(loss_by_output_layer, self.num_layers-1, mini_batch_size)
+        mini_batch_size = X.shape[1]
+        self.jacobi_iteration(loss_by_output_layer,
+                              self.num_layers-1, mini_batch_size, lbda)
         # Return the loss
-        # TODO: Check shape of loss, sum and divide by mini_batch_size if necessary
-        return self.loss_type.apply_function(self.activated_nodes[-1])
+        return self.loss_type.apply_function(Y, self.activated_nodes[-1])
 
-    def jacobi_iteration(self, loss_by_layer, layer_depth, mini_batch_size):
+    def jacobi_iteration(self, loss_by_layer, layer_depth, mini_batch_size, lbda):
         """
         Updates all weights and biases in the network by Jacobi iteration.
 
@@ -125,101 +130,45 @@ class Network:
         :type layer_depth: int
         :param layer_depth: current layer in the network, 0 corresponds to updating first weights
         """
+        print('loss by layer', loss_by_layer.shape)
         if layer_depth == 0:
-            # TODO: layer_by_weights = self.activated_nodes[0] outer self.activations[0].gradient()
-            # TODO: loss_by_weights = loss_by_layer x layer_by_weights
-            # TODO: self.weights_transposed[0] -= self.learning_rate*loss_by_weights/mini_batch_size
-            # TODO: self.biases[0] -= ....
+            print('going into last weights')
+            # c x n array
+            layer_by_sum = self.activations[0].gradient(self.zs[0])
+            # c x n array
+            loss_by_sum = loss_by_layer * layer_by_sum
+            # c x n array
+            sum_by_weights = self.activated_nodes[0]
+            # n x n array
+            loss_by_weights = (
+                (loss_by_sum) @ sum_by_weights.T)/mini_batch_size
+
+            self.weights_transposed[0] -= self.learning_rate * \
+                (loss_by_weights/mini_batch_size + lbda)
+            self.biases[0] -= self.learning_rate * \
+                np.sum(loss_by_sum, axis=1, keepdims=True)/mini_batch_size
         else:
-            # ALl of the above?
-            # TODO: layer_by_layer
+            print('going into a layer')
+            # c x n array
+            layer_by_sum = self.activations[layer_depth].gradient(
+                self.zs[layer_depth])
+            # c x n array
+            loss_by_sum = loss_by_layer * layer_by_sum
+            # c x n array
+            sum_by_weights = self.activated_nodes[layer_depth]
+            # n x n array
+            loss_by_weights = (
+                (loss_by_sum) @ sum_by_weights.T)/mini_batch_size
+            self.weights_transposed[layer_depth] -= self.learning_rate * \
+                (loss_by_weights/mini_batch_size + lbda)
+            self.biases[layer_depth] -= self.learning_rate * \
+                np.sum(loss_by_sum, axis=1, keepdims=True)/mini_batch_size
 
-    def update_mini_batch(self, mini_batch, num_classes, lbda=0):
-        """
-        Update weights and biases for all layers by applying gradient descent
-        to a mini batch. Both are updated with the average gradient for each
-        training example.
-
-        :type mini_batch: ndarray of shape mini_batch_size x num_features+num_classes
-        :param mini_batch: inputs to network horizontally stacked with targets
-
-        :type lbda: number
-        :param lbda: regularization constant
-
-        :returns: average cost for the minibatch
-        """
-        mini_batch_size = mini_batch.shape[0]
-        nabla_b = [np.zeros_like(b) for b in self.biases]
-        nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
-        mini_batch_cost = 0
-        # Get X (num_features x num_examples)
-        X = mini_batch[:, :-num_classes].T
-        Y = mini_batch[:, -num_classes:]
-        for i in range(mini_batch_size):
-            # Make x column vector
-            x = mini_batch[i, :-num_classes]
-            y = mini_batch[i, -num_classes:]
-            # Compute weight changes, bias changes, and loss for each training case
-            delta_nabla_b, delta_nabla_w, training_example_cost = self.backpropagate(
-                x, y)
-            # Sum weight changes in each layer
-            for r in range(self.num_layers):
-                nabla_w[r] += delta_nabla_w[r]
-                nabla_b[r] += delta_nabla_b[r]
-            mini_batch_cost += training_example_cost
-        # Update all weights and biases with the average gradient
-        # self.weights_transposed = [w-(self.learning_rate/len(mini_batch))*nw
-        #                 for w, nw in zip(self.weights_transposed, nabla_w)]
-        # self.biases = [b-(self.learning_rate/len(mini_batch))*nb
-        #                for b, nb in zip(self.biases, nabla_b)]
-        for hl in range(self.num_layers):
-            self.weights_transposed[hl] -= (self.learning_rate * nabla_w[hl]) / \
-                mini_batch_size
-            self.biases[hl] -= (self.learning_rate*nabla_b[hl])/mini_batch_size
-        return mini_batch_cost/len(mini_batch)
-
-    def backpropagate(self, x, y):
-        """
-        :type x: ndarray of shape num_features x ,
-        :param x: training example
-
-        :type y: ndarray of shape num_classes x ,
-        :param y: target
-
-        :returns: list of changes in weights for each layer, list of changes
-        in biases for each layer, cost for training example
-        """
-        # Empty arrays to hold changes in each layer
-        nabla_b = [np.zeros_like(b) for b in self.biases]
-        nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
-        # Forward propagation
-        output_layer = self.forward_propagation(x)
-        loss_gradient = self.loss_type.gradient(y, output_layer)
-        activation_gradient = self.activations[-1].gradient(self.zs[-1])
-        delta = np.multiply(loss_gradient, activation_gradient)
-        # Update last bias-layer
-        nabla_b[-1] = delta
-        # Update last weight-layer
-        previous_a = self.activated_nodes[-2]
-        nabla_w[-1] = np.outer(delta, previous_a)
-        if isinstance(self.activations[-1], Softmax):
-            # Get softmax jacobian of output values z (S by Z)
-            J_softmax_by_output = self.layers[-1]['activation'].jacobian(
-                output_values)
-            # Add softmax-layer to jacobi-iteration (L by Z, S between)
-            J_loss_by_layer = J_loss_by_layer @ J_softmax_by_output
-        # Iterate backwards
-        for l in range(2, self.num_layers+1):
-            activation_gradient = self.activations[-l].gradient(self.zs[-l])
-            # TODO: Check that this is ok
-            layer_gradient = np.dot(self.weights_transposed[-l+1].T, delta)
-            delta = np.multiply(layer_gradient, activation_gradient)
-            nabla_b[-l] = delta
-            previous_a = self.activated_nodes[-l-1]
-            nabla_w[-l] = np.outer(delta, previous_a)
-        prediction = self.activated_nodes[-1]
-        cost = self.loss_type.apply_function(y, prediction)
-        return nabla_b, nabla_w, cost
+            connecting_weights = self.weights_transposed[layer_depth]
+            # Calculate new loss_by_layer to send into next round
+            loss_by_layer = connecting_weights.T @ loss_by_sum
+            self.jacobi_iteration(
+                loss_by_layer, layer_depth-1, mini_batch_size, lbda)
 
     def forward_propagation(self, x):
         """
@@ -239,7 +188,7 @@ class Network:
         for i in range(len(self.biases)):
             weights = self.weights_transposed[i]
             bias = self.biases[i]
-            z = np.dot(weights, activated_node)+bias
+            z = (weights @ activated_node)+bias
             self.zs.append(z)
             activated_node = self.activations[i].apply_function(z)
             self.activated_nodes.append(activated_node)
@@ -271,21 +220,3 @@ class Network:
             print(self.zs[i])
             print('--- activated nodes ---')
             print(self.activated_nodes[i+1])
-
-    def backpropagate_jacobi(self, x, y):
-        # Empty arrays to hold changes in each layer
-        nabla_b = [np.zeros_like(b) for b in self.biases]
-        nabla_w = [np.zeros_like(w) for w in self.weights_transposed]
-        # Forward propagation
-        output_layer = self.forward_propagation(x)
-        # Change in loss by change in output layer (L by Z, L by S for softmax)
-        J_loss_by_layer = self.loss_type.gradient(y, output_layer)
-        previous_a = self.activated_nodes[0]
-        current_a = self.activated_nodes[1]
-        J_layer_by_sum = np.multiply(np.identity(
-            len(current_a)), self.activations[0].gradient(current_a))
-        J_layer_by_weights = np.outer(previous_a, np.diag(J_layer_by_sum))
-        nabla_w[0] = J_layer_by_weights.T
-
-        output_errors = self.loss_type.apply_function(y, output_layer)
-        return nabla_b, nabla_w, output_errors

@@ -205,13 +205,13 @@ if __name__ == '__main__':
         # dev_path
 
         # Model
-        layers = [0]
+        layers = [2]
         activations = ['relu']
         loss_type = 'L2'
 
         # Hyper
-        learning_rate = 0.05
-        no_epochs = 100
+        learning_rate = 8e-2
+        no_epochs = 5000
         L2_regularization = None
 
         # X from dataset has shape num_examples x num_features
@@ -220,17 +220,17 @@ if __name__ == '__main__':
                       [1, 0],
                       [0, 1],
                       [0, 0]])
-        Y = np.array([1, 2, 2, 0])
+        Y = np.array([1, 0, 0, 0])
 
         # Dev sets
-        x_dev = np.array([[1, 1]])#,
-                        #   [1, 0],
-                        #   [0, 1],
-                        #   [0, 0]])
-        y_dev = np.array([1])#, 0, 0, 0])
+        x_dev = np.array([[1, 1]])  # ,
+        #   [1, 0],
+        #   [0, 1],
+        #   [0, 0]])
+        y_dev = np.array([1])  # , 0, 0, 0])
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': Preprocess.get_activation('linear'),
+        output_activation = {'L2': Preprocess.get_activation('tanh'),
                              'cross_entropy': Preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
@@ -251,7 +251,7 @@ if __name__ == '__main__':
         network = Network(X.shape[1])
         # Add hidden layers
         num_hidden_layers = len(layers)
-        if not(num_hidden_layers == 1 and layers[0] ==0):
+        if not(num_hidden_layers == 1 and layers[0] == 0):
             print('adding layers')
             for i in range(num_hidden_layers):
                 layer_size = layers[i]
@@ -264,10 +264,11 @@ if __name__ == '__main__':
         # Train network
         # TODO: DONE Forward propagation with x.shape: num_nodes x ,
         # TODO: BP with the same
-        print('training data:',training_data)
+        print('training data:', training_data)
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
-        #print('--- training cost development:', training_cost)
+        print('--- training cost development:', training_cost)
+        print(network.activated_nodes[-1])
         # loss = network.test(x_dev, y_dev)
         # print('-- validation loss:', loss)
 
