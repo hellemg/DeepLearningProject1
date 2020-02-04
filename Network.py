@@ -60,6 +60,7 @@ class Network:
         np.random.seed(42)
         # self.biases = [np.random.randn(y) for y in self.layer_sizes[1:]]
         self.biases = [np.zeros((y, 1)) for y in self.layer_sizes[1:]]
+        np.random.seed(42)
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 

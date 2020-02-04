@@ -13,10 +13,10 @@ sys and softmax from scipy.special. Notice that tanh is available from numpy.
 
 # Preprocessing, and reading from file
 Preprocess = Preprocess()
-Preprocess.get_config_parameters('config.ini')
-# Data
-train_path = Preprocess.train_path
-dev_path = Preprocess.dev_path
+# Preprocess.get_config_parameters('config.ini')
+# # # Data
+# train_path = Preprocess.train_path
+# dev_path = Preprocess.dev_path
 """
 x_train, y_train = Preprocess.read_dataset(train_path)
 x_dev, y_dev = Preprocess.read_dataset(dev_path)
@@ -78,39 +78,39 @@ if __name__ == '__main__':
 
     elif Menu == 'Arbitrary NN':
         # Data
-        print(train_path)
-        print(dev_path)
+        # print(train_path)
+        # print(dev_path)
 
         # Model
-        layers = [0]
-        activations = ['relu']
+        layers = [2]
+        activations = ['sigmoid']
         loss_type = 'L2'
 
         # Hyper
-        learning_rate = 8e-3
-        no_epochs = 10
+        learning_rate = 10
+        no_epochs = 10000
         L2_regularization = None
 
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
         X = np.array([[1, 1],
-                       [1, 0],
-                       [0, 1],
-                       [0, 0]])
-        Y = np.array([1, 1, 1, 0])
+                        [1, 0],
+                        [0, 1],
+                        [0, 0]])
+        Y = np.array([0, 1, 1, 0])
         #X, Y = Preprocess.read_dataset(train_path)
 
         # Dev sets
-        #x_dev = np.array([[1, 1]])  # ,
+        x_dev = np.array([[1, 1]])  # ,
         #   [1, 0],
         #   [0, 1],
         #   [0, 0]])
-        #y_dev = np.array([1])  # , 0, 0, 0])
+        y_dev = np.array([0])  # , 0, 0, 0])
 
-        x_dev, y_dev = Preprocess.read_dataset(dev_path)
+        #x_dev, y_dev = Preprocess.read_dataset(dev_path)
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': Preprocess.get_activation('step'),
+        output_activation = {'L2': Preprocess.get_activation('sigmoid'),
                              'cross_entropy': Preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
@@ -145,9 +145,10 @@ if __name__ == '__main__':
         print('training data:', training_data)
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
-        print('--- training cost development:', training_cost)
-        #loss = network.test(x_dev, y_dev)
-        #print('-- validation loss:', loss)
+        #print('--- training cost development:', training_cost)
+        network.print_layers()
+        loss = network.test(x_dev, y_dev)
+        print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
         # write_weights_to_file(network)

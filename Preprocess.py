@@ -103,7 +103,7 @@ class Preprocess:
         """
         return {'relu': ReLU(), 'linear': Linear(),
                 'tanh': TanH(), 'softmax': Softmax(),
-                'step': Step()}[name]
+                'step': Step(), 'sigmoid': Sigmoid()}[name]
 
     def get_loss_type(self, name):
         """

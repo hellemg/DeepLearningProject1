@@ -56,6 +56,19 @@ class Step(Activation):
     def gradient(self, z):
         return np.ones_like(z)
 
+class Sigmoid(Activation):
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return 'Sigmoid'
+
+    def apply_function(self, z):
+        return 1/(1+np.exp(-z))
+
+    def gradient(self, z):
+        return self.apply_function(z)*(1-self.apply_function(z))
+
 class Linear(Activation):
     def __init__(self):
         super().__init__()
