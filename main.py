@@ -35,7 +35,7 @@ if __name__ == '__main__':
                           'validation': './DATA/validate_small.csv'}
         config['MODEL'] = {'layers': ' 512, 512,512',
                            'activations': 'relu, relu, relu',
-                           'loss_type': 'L2'}
+                           'loss_type': 'cross_entropy'}
         config['HYPER'] = {'learning_rate': '1e-2',
                            'no_epochs': '50',
                            'L2_regularization': '0'}
@@ -135,7 +135,7 @@ if __name__ == '__main__':
         training_cost = network.train(
             training_data, num_classes, epochs=no_epochs, mini_batch_size=64, lbda=L2_regularization)
         #print('--- training cost development:', training_cost)
-        network.print_layers()
+        #network.print_layers()
         loss = network.test(dev_data, num_classes)
         print('-- validation loss:', loss)
 

@@ -114,6 +114,11 @@ class Network:
             loss_by_output_layer, self.num_layers-1, mini_batch_size, lbda)
         # Return the loss
         #self.print_layers()
+        # print(self.activated_nodes[-1])
+        # print(Y)
+        # print(self.activated_nodes[-1].shape)
+        # print(Y.shape)
+        # input()
         return self.loss_type.apply_function(Y, self.activated_nodes[-1])
 
     def backpropagate_output(self, loss_by_output_layer, layer_depth, mini_batch_size, lbda):
