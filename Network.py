@@ -64,7 +64,7 @@ class Network:
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
-    def train(self, training_data, num_classes=1, epochs=1, mini_batch_size=4):
+    def train(self, training_data, num_classes=1, epochs=1, mini_batch_size=4, lbda=0):
         """
         Train the network on training_data with batch_size 4, 10 epochs
 
@@ -84,14 +84,14 @@ class Network:
             # Train over each minibatch
             for mini_batch in mini_batches:
                 mini_batch_cost = self.backpropagate_batch(
-                    mini_batch, num_classes)
+                    mini_batch, num_classes, lbda)
                 # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
                 training_cost.append(mini_batch_cost)
             print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
             # If mini_batch_size=1, this needs to bed removed
         return training_cost
 
-    def backpropagate_batch(self, mini_batch, num_classes, lbda=0):
+    def backpropagate_batch(self, mini_batch, num_classes, lbda):
         """
         Update weights and biases for all layers by applying gradient descent
         to a mini batch.
@@ -151,7 +151,7 @@ class Network:
             # print('loss_by_weights', loss_by_weights.shape)
             # print('weights:', self.weights_transposed[layer_depth].shape)
             self.weights_transposed[layer_depth] -= self.learning_rate * \
-                (loss_by_weights/mini_batch_size + lbda)
+                ((loss_by_weights+lbda)/mini_batch_size
             # print(np.sum(loss_by_sum.T, axis=1, keepdims=True).shape)
             # print('biases:', self.biases[layer_depth].shape)
             self.biases[layer_depth] -= self.learning_rate * \
@@ -206,7 +206,7 @@ class Network:
         # print(self.biases[layer_depth].shape)
         # print(np.sum(loss_by_sum, axis=1, keepdims=True).shape)
         self.weights_transposed[layer_depth] -= self.learning_rate * \
-            (loss_by_weights/mini_batch_size + lbda)
+            (loss_by_weights+lbda)/mini_batch_size
         self.biases[layer_depth] -= self.learning_rate * \
             np.sum(loss_by_sum, axis=1, keepdims=True)/mini_batch_size
         if layer_depth != 0:
