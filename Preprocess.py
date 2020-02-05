@@ -33,14 +33,16 @@ class Preprocess:
         layers = self.config['MODEL']['layers'].split(',')
         # Remove whitespace and cast to int
         self.layers = [int(x.strip(' ')) for x in layers]
-        # TODO: if layers[0] == 0, no hidden layers
-        self.activations = self.config['MODEL']['activations']
+
+        activations = self.config['MODEL']['activations'].split(',')
+        self.activations = [x.strip(' ') for x in activations]
+
         self.loss_type = self.config['MODEL']['loss_type']
 
         # Hyper
-        self.learning_rate = self.config['HYPER']['learning_rate']
-        self.no_epochs = self.config['HYPER']['no_epochs']
-        self.L2_regularization = self.config['HYPER']['L2_regularization']
+        self.learning_rate = float(self.config['HYPER']['learning_rate'])
+        self.no_epochs = int(self.config['HYPER']['no_epochs'])
+        self.L2_regularization = float(self.config['HYPER']['L2_regularization'])
 
         print('... parameters are set')
 

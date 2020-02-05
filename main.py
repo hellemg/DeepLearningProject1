@@ -11,29 +11,6 @@ The following imports are OK, and not anything else: numpy, matplotlib.pyplot, c
 sys and softmax from scipy.special. Notice that tanh is available from numpy.
 """
 
-# Preprocessing, and reading from file
-Preprocess = Preprocess()
-# Preprocess.get_config_parameters('config.ini')
-# # # Data
-# train_path = Preprocess.train_path
-# dev_path = Preprocess.dev_path
-"""
-x_train, y_train = Preprocess.read_dataset(train_path)
-x_dev, y_dev = Preprocess.read_dataset(dev_path)
-# Model
-activation_names = ['relu']
-loss_type_name = 'L2'
-
-hidden_layers = [2, 1]
-activations = [Preprocess.get_activation(name) for name in activation_names]
-loss_type = Preprocess.get_loss_type(loss_type_name)
-# Hyper
-learning_rate = 0.01
-no_epochs = 100
-L2_regularization = 'heihei'
-"""
-
-
 def write_weights_to_file(neural_network, path='somefile.txt'):
     with open(path, 'w') as filehandle:
         for weights in neural_network.weights_transposed:
@@ -56,12 +33,12 @@ if __name__ == '__main__':
         config = configparser.ConfigParser()
         config['DATA'] = {'training': './DATA/train_small.csv',
                           'validation': './DATA/validate_small.csv'}
-        config['MODEL'] = {'layers': ' 24, 12,6',
-                           'activations': 'relu, relu, tanh',
-                           'loss_type': 'cross_entropy'}
-        config['HYPER'] = {'learning_rate': '5.E-2',
-                           'no_epochs': '10',
-                           'L2_regularization': '5.E-3'}
+        config['MODEL'] = {'layers': ' 512, 512,512',
+                           'activations': 'relu, relu, relu',
+                           'loss_type': 'L2'}
+        config['HYPER'] = {'learning_rate': '1e-2',
+                           'no_epochs': '50',
+                           'L2_regularization': '0'}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
 
@@ -80,43 +57,51 @@ if __name__ == '__main__':
         # Data
         # print(train_path)
         # print(dev_path)
+        preprocess = Preprocess()
+        preprocess.get_config_parameters('config.ini')
+        # # Data
+        train_path = preprocess.train_path
+        dev_path = preprocess.dev_path
 
         # Model
-        layers = [2]
-        activations = ['sigmoid']
-        loss_type = 'L2'
+        # layers = [2]
+        # activations = ['relu']
+        # loss_type = 'L2'
+        layers  = preprocess.layers
+        activations = preprocess.activations
+        loss_type = preprocess.loss_type
 
         # Hyper
-        learning_rate = 10
-        no_epochs = 10000
-        L2_regularization = None
+        # learning_rate = 1e-1
+        # no_epochs = 10000
+        # L2_regularization = 0
+        learning_rate = preprocess.learning_rate
+        no_epochs = preprocess.no_epochs
+        L2_regularization = preprocess.L2_regularization
 
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
-        X = np.array([[1, 1],
-                        [1, 0],
-                        [0, 1],
-                        [0, 0]])
-        Y = np.array([0, 1, 1, 0])
-        #X, Y = Preprocess.read_dataset(train_path)
+        # X = np.array([[1, 1],
+        #               [1, 0],
+        #               [0, 1],
+        #               [0, 0]])
+        # Y = np.array([0, 1, 1, 0])
+        X, Y = preprocess.read_dataset(train_path)
 
         # Dev sets
-        x_dev = np.array([[1, 1]])  # ,
-        #   [1, 0],
-        #   [0, 1],
-        #   [0, 0]])
-        y_dev = np.array([0])  # , 0, 0, 0])
+        # x_dev = X.copy()
+        # y_dev = Y.copy()
 
-        #x_dev, y_dev = Preprocess.read_dataset(dev_path)
+        x_dev, y_dev = preprocess.read_dataset(dev_path)
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': Preprocess.get_activation('sigmoid'),
-                             'cross_entropy': Preprocess.get_activation('softmax')}[loss_type]
+        output_activation = {'L2': preprocess.get_activation('tanh'),
+                             'cross_entropy': preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
             # One hot encode Y
-            Y = Preprocess.one_hot_encode(X.shape[0], num_classes, Y)
-            y_dev = Preprocess.one_hot_encode(
+            Y = preprocess.one_hot_encode(X.shape[0], num_classes, Y)
+            y_dev = preprocess.one_hot_encode(
                 x_dev.shape[0], num_classes, y_dev)
         else:
             # Make Y a column vector
@@ -125,6 +110,7 @@ if __name__ == '__main__':
 
         # Combine X and Y
         training_data = np.hstack((X, Y))
+        dev_data = np.hstack((x_dev, y_dev))
 
         # Define network
         # First layer should have size num_features
@@ -135,19 +121,22 @@ if __name__ == '__main__':
             print('adding layers')
             for i in range(num_hidden_layers):
                 layer_size = layers[i]
-                activation = Preprocess.get_activation(activations[i])
+                activation = preprocess.get_activation(activations[i])
                 network.add_layer(layer_size, activation)
         network.add_layer(num_classes, output_activation)
         # Compile network
-        network.compile(learning_rate, Preprocess.get_loss_type(loss_type))
+        network.compile(learning_rate, preprocess.get_loss_type(loss_type))
+
+        print(learning_rate)
+        print(type(learning_rate))
 
         # Train network
         print('training data:', training_data)
         training_cost = network.train(
-            training_data, num_classes, epochs=no_epochs, mini_batch_size=4)
+            training_data, num_classes, epochs=no_epochs, mini_batch_size=64, lbda=L2_regularization)
         #print('--- training cost development:', training_cost)
         network.print_layers()
-        loss = network.test(x_dev, y_dev)
+        loss = network.test(dev_data, num_classes)
         print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
