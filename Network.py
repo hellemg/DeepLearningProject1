@@ -58,7 +58,6 @@ class Network:
         :type weights: list of ndarrays, each ndarray is num_nodes x num_nodes_prevlayer
         """
         np.random.seed(42)
-        # self.biases = [np.random.randn(y) for y in self.layer_sizes[1:]]
         self.biases = [np.zeros((y, 1)) for y in self.layer_sizes[1:]]
         np.random.seed(42)
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
@@ -244,18 +243,22 @@ class Network:
             self.activated_nodes.append(activated_node)
         return activated_node
 
-    def test(self, x, y):
+    def test(self, test_data, num_classes):
         """
         Forward propagate x after transpose and get output, check loss
-        :type x: ndarray of shape num_examples x num_features
-        :param y: ndarray of shape num_classes x num_examples
+        :type test_data: ndarray of shape num_examples x num_features+num_labels
+        :param test_data: examples horizontally stacked with labels
+
+        :type num_classes: int
+        :param num_classes: number of output nodes
         """
         validation_loss=0
-        num_examples=len(x)
-        for i in range(num_examples):
-            z=self.forward_propagation(x[i])
-            validation_loss += self.loss_type.apply_function(y[i], z)
-        return validation_loss/num_examples
+        # Get X (num_features x num_examples)
+        X = test_data[:, :-num_classes].T
+        # Get Y (num_classes x num_examples)
+        Y = test_data[:, -num_classes:].T
+        Z = self.forward_propagation(X)
+        return self.loss_type.apply_function(Y, Z)
 
     def print_layers(self):
         print('--- input nodes ---')
