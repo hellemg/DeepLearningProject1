@@ -1,15 +1,9 @@
 import numpy as np
+from Function import *
 
-
-class Activation:
+class Activation(Function):
     def __init__(self):
-        pass
-
-    def apply_function(self):
-        raise NotImplementedError
-
-    def gradient(self, values):
-        raise NotImplementedError
+        super().__init__()
 
     def backpropagate(self, next_der):
         # backpropagate partial derivative from next layer 
@@ -31,49 +25,10 @@ class ReLU(Activation):
         return 'ReLU'
 
     def apply_function(self, z):
-        """
-        :type z: ndarray
-        :param z: vector input
-
-        :returns: ndarray of same length as z        
-        """
         return np.maximum(0, z)
 
     def gradient(self, z):
-        """
-        :type z: ndarray
-        :param z: vector input
-
-        :returns: ndarray of same length as z        
-        """
-        return 1*(z > 0)
-
-class Step(Activation):
-    def __init__(self):
-        super().__init__()
-
-    def __str__(self):
-        return 'Step'
-
-    def apply_function(self, z):
-        treshold = 0.5
-        return 1*(z>treshold)
-
-    def gradient(self, z):
-        return np.ones_like(z)
-
-class Sigmoid(Activation):
-    def __init__(self):
-        super().__init__()
-
-    def __str__(self):
-        return 'Sigmoid'
-
-    def apply_function(self, z):
-        return 1/(1+np.exp(-z))
-
-    def gradient(self, z):
-        return self.apply_function(z)*(1-self.apply_function(z))
+        return 1.0*(z > 0)
 
 class Linear(Activation):
     def __init__(self):
@@ -83,21 +38,9 @@ class Linear(Activation):
         return 'Linear'
 
     def apply_function(self, z):
-        """
-        :type z: ndarray
-        :param z: vector input
-
-        :returns: ndarray of same length as z
-        """
         return z
 
     def gradient(self, z):
-        """
-        :type z: ndarray
-        :param z: vector input
-
-        :returns: ndarray of same length as z        
-        """
         return np.ones_like(z)
 
 
@@ -109,23 +52,10 @@ class TanH(Activation):
         return 'TanH'
 
     def apply_function(self, z):
-        """
-        :type z: ndarray
-        :param z: vector input
-
-        :returns: ndarray of same length as z
-        """
         return np.tanh(z)
 
     def gradient(self, z):
-        """
-        :type z: ndarray
-        :param z: vector input
-
-        :returns: ndarray of same length as z        
-        """
         return (np.cosh(z))**(-2)
-
 
 class Softmax(Activation):
     def __init__(self):
@@ -135,32 +65,16 @@ class Softmax(Activation):
         return 'Softmax'
 
     def apply_function(self, z):
-        """
-        :type z: ndarray of shape num_classes x num_examples
-        :param z: vector input 
-
-        :returns: ndarray of shape num_classes x num_examples
-        """
+        raise NotImplementedError
         z = z - np.max(z)
         exps = np.exp(z)
         return exps/np.sum(exps, axis=0)
 
     def jacobian(self, s):
-        """
-        :type s: ndarray
-        :param s vector input
-
-        :returns: ndarray of shape (len(s), len(s))
-        """
         return np.diag(s) - np.outer(s, s)
 
     def gradient(self, z):
-        """
-        :type z: ndarray of shape num_classes x num_examples
-        :param z: vector input
-
-        :returns: ndarray of shape num_classes x num_classes x num_examples
-        """
+        raise NotImplementedError
         s = self.apply_function(z)
         num_classes = s.shape[0]
         jacobian_tensor = np.reshape(self.jacobian(

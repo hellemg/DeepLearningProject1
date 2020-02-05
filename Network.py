@@ -9,6 +9,10 @@ activated_nodes: activation function on zs
 
 class Network:
     def __init__(self, input_layer_size):
+        # Add Activation and Dense
+        self.layers = []
+
+
         self.layer_sizes = [input_layer_size]
         self.activations = []
         self.learning_rate = None
@@ -82,12 +86,33 @@ class Network:
                             for i in range(0, n, mini_batch_size)]
             # Train over each minibatch
             for mini_batch in mini_batches:
-                mini_batch_cost = self.backpropagate_batch(
-                    mini_batch, num_classes, lbda)
-                # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
-                training_cost.append(mini_batch_cost)
+                self.train_batch(mini_batch, num_classes,lbda)    
+            
+                # mini_batch_cost = self.backpropagate_batch(
+                #     mini_batch, num_classes, lbda)
+                # # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
+                # training_cost.append(mini_batch_cost)
             print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
         return training_cost
+
+    def train_batch(self, mini_batch, num_classes,lbda):
+        # Get X (num_features x num_examples)
+        X = mini_batch[:, :-num_classes].T
+        # Get Y (num_classes x num_examples)
+        Y = mini_batch[:, -num_classes:].T
+        
+        # Forward propagation
+        for layer in self.layers:
+            # Activate and add X to Activation's prev_x, go through Dense
+            X = layer.forward(X)
+        
+        # Backpropagation
+        der = self.loss_function.apply_function(Y, X)
+        for layer in reversed(self.layers):
+            # Add nabla_W and nabla_b to Dense, go through Activate
+            der = layer.backpropagate(der)
+
+        # TODO: find out where to update weights and biases
 
     def backpropagate_batch(self, mini_batch, num_classes, lbda):
         """

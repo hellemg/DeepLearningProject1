@@ -1,15 +1,9 @@
 import numpy as np
 
 
-class Dense:
+class Dense(Function):
     def __init__(self):
-        pass
-
-    def apply_function(self):
-        raise NotImplementedError
-
-    def gradient(self, values):
-        raise NotImplementedError
+        super().__init__()
 
     def backpropagate(self, next_der):
         # backpropagate partial derivative from next layer 
