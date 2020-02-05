@@ -147,7 +147,7 @@ class Softmax(Activation):
         """
         z = z - np.max(z)
         exps = np.exp(z)
-        return exps/np.sum(exps)
+        return exps/np.sum(exps, axis=0)
 
     def jacobian(self, s):
         """
