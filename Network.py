@@ -63,7 +63,7 @@ class Network:
         self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
                                    for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
-    def train(self, training_data, num_classes=1, epochs=1, mini_batch_size=4, lbda=0):
+    def train(self, training_data, num_classes, epochs, mini_batch_size, lbda=0):
         """
         Train the network on training_data with batch_size 4, 10 epochs
 
@@ -87,7 +87,6 @@ class Network:
                 # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
                 training_cost.append(mini_batch_cost)
             print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
-            # If mini_batch_size=1, this needs to bed removed
         return training_cost
 
     def backpropagate_batch(self, mini_batch, num_classes, lbda):

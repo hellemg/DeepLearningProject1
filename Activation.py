@@ -11,6 +11,31 @@ class Activation:
     def gradient(self, values):
         raise NotImplementedError
 
+    def backpropagate(self, next_der):
+        # backpropagate partial derivative from next layer 
+        """
+        :type next_der: ndarray of shape num_features x num_examples
+        """
+        return next_der * self.gradient(self.prev_x)
+
+    def forward(self, x):
+
+
+        # take in dL/da from previous layer
+        # add da/dz for this layer to have dL/dz. da/dz = f'(z). Blue in textbook
+        prev_delta = prev_delta * self.gradient(self.zs)
+        # add dz/dw (=a from earlier layer) for this layer. orange in textbook
+        self.nabla_w = ??
+        # update weights (dL/dw) and biases (dL/dz)
+        self.nabla_b = prev_delta
+        # add dz/da to give next layer dL/da (a for this layer)
+        prev_delta = prev_delta @ self.weights ??
+        # TODO: check that prev_delta now is as on top of second page in notebook (slide 44)
+        return prev_delta    
+    
+
+    def get_nabla_w(self, dL_dz, )
+
 
 class ReLU(Activation):
     def __init__(self):
@@ -40,7 +65,6 @@ class ReLU(Activation):
         :returns: ndarray of same length as z        
         """
         return 1*(z > 0)
-
 
 class Step(Activation):
     def __init__(self):
