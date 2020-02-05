@@ -151,7 +151,7 @@ class Network:
             # print('loss_by_weights', loss_by_weights.shape)
             # print('weights:', self.weights_transposed[layer_depth].shape)
             self.weights_transposed[layer_depth] -= self.learning_rate * \
-                ((loss_by_weights+lbda)/mini_batch_size)
+                (loss_by_weights+lbda)/mini_batch_size
             # print(np.sum(loss_by_sum.T, axis=1, keepdims=True).shape)
             # print('biases:', self.biases[layer_depth].shape)
             self.biases[layer_depth] -= self.learning_rate * \
@@ -206,7 +206,7 @@ class Network:
         # print(self.biases[layer_depth].shape)
         # print(np.sum(loss_by_sum, axis=1, keepdims=True).shape)
         self.weights_transposed[layer_depth] -= self.learning_rate * \
-            (loss_by_weights+lbda)/mini_batch_size)
+            (loss_by_weights+lbda)/mini_batch_size
         self.biases[layer_depth] -= self.learning_rate * \
             np.sum(loss_by_sum, axis=1, keepdims=True)/mini_batch_size
         if layer_depth != 0:
