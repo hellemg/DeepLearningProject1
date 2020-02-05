@@ -19,23 +19,9 @@ class Activation:
         return next_der * self.gradient(self.prev_x)
 
     def forward(self, x):
-
-
-        # take in dL/da from previous layer
-        # add da/dz for this layer to have dL/dz. da/dz = f'(z). Blue in textbook
-        prev_delta = prev_delta * self.gradient(self.zs)
-        # add dz/dw (=a from earlier layer) for this layer. orange in textbook
-        self.nabla_w = ??
-        # update weights (dL/dw) and biases (dL/dz)
-        self.nabla_b = prev_delta
-        # add dz/da to give next layer dL/da (a for this layer)
-        prev_delta = prev_delta @ self.weights ??
-        # TODO: check that prev_delta now is as on top of second page in notebook (slide 44)
-        return prev_delta    
-    
-
-    def get_nabla_w(self, dL_dz, )
-
+        # Activate input x (z)
+        self.prev_x = x
+        return self.apply_function(x)
 
 class ReLU(Activation):
     def __init__(self):
@@ -46,8 +32,6 @@ class ReLU(Activation):
 
     def apply_function(self, z):
         """
-        Return the ReLU of vector z
-
         :type z: ndarray
         :param z: vector input
 
@@ -57,8 +41,6 @@ class ReLU(Activation):
 
     def gradient(self, z):
         """
-        Return the gradient of ReLU with respect to vector z
-
         :type z: ndarray
         :param z: vector input
 
@@ -102,8 +84,6 @@ class Linear(Activation):
 
     def apply_function(self, z):
         """
-        Return the Linear of vector z
-
         :type z: ndarray
         :param z: vector input
 
@@ -113,8 +93,6 @@ class Linear(Activation):
 
     def gradient(self, z):
         """
-        Return the gradient of Linear with respect to vector z
-
         :type z: ndarray
         :param z: vector input
 
@@ -132,8 +110,6 @@ class TanH(Activation):
 
     def apply_function(self, z):
         """
-        Return the TanH of vector z
-
         :type z: ndarray
         :param z: vector input
 
@@ -143,8 +119,6 @@ class TanH(Activation):
 
     def gradient(self, z):
         """
-        Return the gradient of TanH with respect to vector z
-
         :type z: ndarray
         :param z: vector input
 
@@ -162,8 +136,6 @@ class Softmax(Activation):
 
     def apply_function(self, z):
         """
-        Return the Softmax of vector z, protected against under/overflow
-
         :type z: ndarray of shape num_classes x num_examples
         :param z: vector input 
 
@@ -175,8 +147,6 @@ class Softmax(Activation):
 
     def jacobian(self, s):
         """
-        Returns the Jacobian of the Softmax vector s
-
         :type s: ndarray
         :param s vector input
 
@@ -186,8 +156,6 @@ class Softmax(Activation):
 
     def gradient(self, z):
         """
-        Returns the jacobian of vector z, protected against under/overflow
-
         :type z: ndarray of shape num_classes x num_examples
         :param z: vector input
 
