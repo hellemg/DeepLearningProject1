@@ -103,9 +103,9 @@ class Preprocess:
 
         :returns: subclass of Activation
         """
+        print('.....',name)
         return {'relu': ReLU(), 'linear': Linear(),
-                'tanh': TanH(), 'softmax': Softmax(),
-                'step': Step(), 'sigmoid': Sigmoid()}[name]
+                'tanh': TanH(), 'softmax': Softmax()}[name]
 
     def get_loss_type(self, name):
         """

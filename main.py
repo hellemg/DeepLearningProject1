@@ -5,6 +5,9 @@ from Preprocess import *
 from Activation import *
 from Loss import *
 from Network import *
+from Dense import *
+
+np.random.seed(42)
 
 """
 The following imports are OK, and not anything else: numpy, matplotlib.pyplot, configparser, enum,
@@ -58,41 +61,41 @@ if __name__ == '__main__':
         # print(train_path)
         # print(dev_path)
         preprocess = Preprocess()
-        preprocess.get_config_parameters('config.ini')
-        # # Data
-        train_path = preprocess.train_path
-        dev_path = preprocess.dev_path
+        # preprocess.get_config_parameters('config.ini')
+        # # # Data
+        # train_path = preprocess.train_path
+        # dev_path = preprocess.dev_path
 
         # Model
-        # layers = [2]
-        # activations = ['relu']
-        # loss_type = 'L2'
-        layers  = preprocess.layers
-        activations = preprocess.activations
-        loss_type = preprocess.loss_type
+        layers = [0]
+        activations = ['relu']
+        loss_type = 'L2'
+        # layers  = preprocess.layers
+        # activations = preprocess.activations
+        # loss_type = preprocess.loss_type
 
         # Hyper
-        # learning_rate = 1e-1
-        # no_epochs = 10000
-        # L2_regularization = 0
-        learning_rate = preprocess.learning_rate
-        no_epochs = preprocess.no_epochs
-        L2_regularization = preprocess.L2_regularization
+        learning_rate = 1e-1
+        no_epochs = 2
+        L2_regularization = 0
+        # learning_rate = preprocess.learning_rate
+        # no_epochs = preprocess.no_epochs
+        # L2_regularization = preprocess.L2_regularization
 
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
-        # X = np.array([[1, 1],
-        #               [1, 0],
-        #               [0, 1],
-        #               [0, 0]])
-        # Y = np.array([0, 1, 1, 0])
-        X, Y = preprocess.read_dataset(train_path)
+        X = np.array([[1, 1],
+                      [1, 0],
+                      [0, 1],
+                      [0, 0]])
+        Y = np.array([0, 1, 1, 0])
+        #X, Y = preprocess.read_dataset(train_path)
 
         # Dev sets
-        # x_dev = X.copy()
-        # y_dev = Y.copy()
+        x_dev = X.copy()
+        y_dev = Y.copy()
 
-        x_dev, y_dev = preprocess.read_dataset(dev_path)
+        #x_dev, y_dev = preprocess.read_dataset(dev_path)
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
         output_activation = {'L2': preprocess.get_activation('tanh'),
@@ -114,30 +117,36 @@ if __name__ == '__main__':
 
         # Define network
         # First layer should have size num_features
-        network = Network(X.shape[1])
+        network = Network()
         # Add hidden layers
         num_hidden_layers = len(layers)
+        input_dims = X.shape[1]
         if not(num_hidden_layers == 1 and layers[0] == 0):
-            print('adding layers')
             for i in range(num_hidden_layers):
                 layer_size = layers[i]
+                # Add dense layer
+                dense = Dense(input_dims, layer_size)
+                network.add_layer(dense)
+                # Add activation layer
                 activation = preprocess.get_activation(activations[i])
-                network.add_layer(layer_size, activation)
-        network.add_layer(num_classes, output_activation)
+                network.add_layer(activation)
+        # Add output dense layer
+        dense = Dense(layers[-1], num_classes)
+        network.add_layer(dense)
+        # Add output activatoin layer
+        network.add_layer(output_activation)
+
         # Compile network
         network.compile(learning_rate, preprocess.get_loss_type(loss_type))
 
-        print(learning_rate)
-        print(type(learning_rate))
-
         # Train network
-        print('training data:', training_data)
-        training_cost = network.train(
-            training_data, num_classes, epochs=no_epochs, mini_batch_size=64, lbda=L2_regularization)
-        #print('--- training cost development:', training_cost)
-        #network.print_layers()
-        loss = network.test(dev_data, num_classes)
-        print('-- validation loss:', loss)
+        # print('training data:', training_data)
+        # training_cost = network.train(
+        #     training_data, num_classes, epochs=no_epochs, mini_batch_size=64, lbda=L2_regularization)
+        # #print('--- training cost development:', training_cost)
+        # #network.print_layers()
+        # loss = network.test(dev_data, num_classes)
+        # print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
         # write_weights_to_file(network)

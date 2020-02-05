@@ -8,24 +8,14 @@ activated_nodes: activation function on zs
 
 
 class Network:
-    def __init__(self, input_layer_size):
+    def __init__(self):
         # Add Activation and Dense
         self.layers = []
 
-
-        self.layer_sizes = [input_layer_size]
-        self.activations = []
         self.learning_rate = None
-        self.loss_type = None
-        # Number of hidden layers + 1 (for the output layer)
-        self.num_layers = None
-        self.biases = None
-        self.weights_transposed = None
-        # Values calculated in forward propagation
-        self.zs = None
-        self.activated_nodes = None
+        self.loss_function = None
 
-    def add_layer(self, num_nodes, activation):
+    def add_layer(self, function):
         """
         Adds a hidden layer or an output layer
         A layer consists of the nodes, and the weights coming into
@@ -34,23 +24,22 @@ class Network:
         Add num_nodes to the list of layers
         Adds activation object to the list of activations
         """
-        self.layer_sizes.append(num_nodes)
-        self.activations.append(activation)
+        self.layers.append(function)
+        #self.layer_sizes.append(num_nodes)
+        #self.activations.append(activation)
 
     def compile(self, learning_rate, loss_type):
         """
         Sets weights and biases for all layers in network
         Sets learning rate, loss type, number of layers
         """
-        self.initialize_weights_and_biases()
+        #self.initialize_weights_and_biases()
         self.learning_rate = learning_rate
-        self.loss_type = loss_type
-        self.num_layers = len(self.biases)
-        print('Using loss:', self.loss_type)
-        print('Using activations:')
-        for i in range(self.num_layers):
-            print(self.activations[i])
-        print('# hidden layers + output layer:', self.num_layers)
+        self.loss_function = loss_type
+
+    def print_network(self):
+        for layer in self.layers:
+            print(layer, '->' )
 
     def initialize_weights_and_biases(self):
         """
@@ -133,7 +122,7 @@ class Network:
         Y = mini_batch[:, -num_classes:].T
         mini_batch_size = X.shape[1]
         output_layer = self.forward_propagation(X)
-        loss_by_output_layer = self.loss_type.gradient(Y, output_layer)
+        loss_by_output_layer = self.loss_function.gradient(Y, output_layer)
         self.backpropagate_output(
             loss_by_output_layer, self.num_layers-1, mini_batch_size, lbda)
         # Return the loss
@@ -143,7 +132,7 @@ class Network:
         # print(self.activated_nodes[-1].shape)
         # print(Y.shape)
         # input()
-        return self.loss_type.apply_function(Y, self.activated_nodes[-1])
+        return self.loss_function.apply_function(Y, self.activated_nodes[-1])
 
     def backpropagate_output(self, loss_by_output_layer, layer_depth, mini_batch_size, lbda):
         """
@@ -287,7 +276,7 @@ class Network:
         # Get Y (num_classes x num_examples)
         Y = test_data[:, -num_classes:].T
         Z = self.forward_propagation(X)
-        return self.loss_type.apply_function(Y, Z)
+        return self.loss_function.apply_function(Y, Z)
 
     def print_layers(self):
         print('--- input nodes ---')

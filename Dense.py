@@ -1,9 +1,19 @@
+from Function import *
 import numpy as np
 
 
 class Dense(Function):
-    def __init__(self):
+    def __init__(self, input_dims, output_dims):
         super().__init__()
+        self.initialize_weights(input_dims, output_dims)
+    
+    def __str__(self):
+        return 'Dense'
+
+    def initialize_weights(self, input_dims, output_dims):
+        # Set bias and weights
+        self.b = np.zeros((output_dims, 1))
+        self.W = np.random.normal(0, 1/np.sqrt(output_dims), (input_dims, output_dims))
 
     def backpropagate(self, next_der):
         # backpropagate partial derivative from next layer 
