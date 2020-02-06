@@ -133,5 +133,7 @@ if __name__ == '__main__':
         plt.legend(loc="upper right")
         plt.show()
 
+        print(np.argmin(dev_cost))
+
         # Dump weights (transposed) to file
         # write_weights_to_file(network)
