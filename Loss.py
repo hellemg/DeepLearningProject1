@@ -6,29 +6,9 @@ class Loss:
         pass
 
     def apply_function(self, y, a):
-        # Overwrites the comments in Function
-        """
-        :type a: ndarray of shape num_x x output_size
-        :type y: ndarray of shape num_x x output_size
-
-        :param a: prediction
-        :param y: target
-
-        :returns: ndarray of shape num_ex x output_size
-        """
         raise NotImplementedError
 
     def gradient(self, y, a):
-        # Overwrites the comments in Function
-        """
-        :type a: ndarray of shape num_x x output_size
-        :type y: ndarray of shape num_x x output_size
-
-        :param a: prediction
-        :param y: target
-
-        :returns: ndarray of shape num_ex x output_size
-        """
         raise NotImplementedError
 
 
@@ -57,7 +37,25 @@ class L2:
         return 'L2'
 
     def apply_function(self, y, a):
+        """
+        :type a: ndarray of shape num_x x output_size
+        :type y: ndarray of shape num_x x output_size
+
+        :param a: prediction
+        :param y: target
+
+        :returns: ndarray of shape num_ex x 1
+        """
         return 1/2*(y - a)**2
 
     def gradient(self, y, a):
+        """
+        :type a: ndarray of shape num_x x output_size
+        :type y: ndarray of shape num_x x output_size
+
+        :param a: prediction
+        :param y: target
+
+        :returns: ndarray of shape num_ex x output_size
+        """
         return y - a
