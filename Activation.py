@@ -75,27 +75,36 @@ class Softmax(Activation):
         return 'Softmax'
 
     def apply_function(self, z):
-        raise NotImplementedError
+        """
+        :type z: ndarray of shape num_ex x input_size
+
+        :returns: ndarray of shape num_ex x output_size (output_size = input_size for Activation)
+        """
         z = z - np.max(z)
         exps = np.exp(z)
-        return exps/np.sum(exps, axis=0)
+        return exps/np.sum(exps, axis=1, keepdims=True)
 
     def jacobian(self, s):
+        """
+        make jacobian for one example
+        """
         return np.diag(s) - np.outer(s, s)
 
     def gradient(self, z):
-        raise NotImplementedError
+        """
+        Takes in weighted sum from prev layer
+        """
         s = self.apply_function(z)
-        num_classes = s.shape[0]
-        jacobian_tensor = np.reshape(self.jacobian(
-            s[:, 0]), (1, num_classes, num_classes))
-        for i in range(1, s.shape[1]):
-            jacobian = np.reshape(self.jacobian(
-                s[:, i]), (1, num_classes, num_classes))
+        num_classes = s.shape[1]
+        jacobian = self.jacobian(s[0])
+        jacobian_tensor = np.reshape(jacobian, (1, num_classes, num_classes))
+        for i in range(1, s.shape[0]):
+            jacobian = self.jacobian(s[i])
+            jacobian = np.reshape(jacobian, (1, num_classes, num_classes))
             jacobian_tensor = np.append(jacobian_tensor, jacobian, axis=0)
         return jacobian_tensor
 
     def backpropagate(self, next_der, debug=False):
         next_der = np.reshape(next_der, (next_der.shape[0], next_der.shape[1], 1))
         der = self.gradient(self.prev_x) @ next_der
-        return np.reshape(der(next_der.shape[0], self.prev_x.shape[1]))
+        return np.reshape(der, (next_der.shape[0], self.prev_x.shape[1]))

@@ -128,12 +128,12 @@ if __name__ == '__main__':
         network.compile(learning_rate, preprocess.get_loss_type(loss_type), L2_regularization)
 
         # Train network
-        training_cost = network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=64)
+        training_cost, dev_cost = network.train(training_data, dev_data, num_classes, epochs=no_epochs, mini_batch_size=64)
 
-        plt.plot(np.arange(1,no_epochs+1), training_cost)
+        plt.plot(np.arange(1,no_epochs+1), training_cost, 'r', label='training cost')
+        plt.plot(np.arange(1,no_epochs+1), dev_cost, 'b', label='validation cost')
+        plt.legend(loc="upper right")
         plt.show()
-        # loss = network.test(dev_data, num_classes)
-        # print('-- validation loss:', loss)
 
         # Dump weights (transposed) to file
         # write_weights_to_file(network)

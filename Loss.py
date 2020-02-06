@@ -20,12 +20,28 @@ class CrossEntropy:
         return 'Crossentropy'
 
     def apply_function(self, y, a):
-        raise NotImplementedError
+        """
+        :type y:  ndarray of shape num_ex x num_classes
+        :param y: target
+        
+        :type y:  ndarray of shape num_ex x num_classes
+        :param y: prediction
+
+        :returns: ndarray of shape num_ex x 1     
+        """
         # Since y is one-hot encoded, we can omit multiplying with it and just use s-values where y=1
-        return -np.log(a[np.where(y)])
+        return -np.log(a[np.where(y)])[:, np.newaxis]
 
     def gradient(self, y, a):
-        raise NotImplementedError
+        """
+        :type y:  ndarray of shape num_ex x num_classes
+        :param y: target
+        
+        :type y:  ndarray of shape num_ex x num_classes
+        :param y: prediction
+
+        :returns: ndarray of shape num_ex x num_classes 
+        """
         return -y / a
 
 
@@ -44,7 +60,7 @@ class L2:
         :param a: prediction
         :param y: target
 
-        :returns: ndarray of shape num_ex x output_size (output_size = 1 for L2)
+        :returns: ndarray of shape num_ex x 1
         """
         return 1/2*(a - y)**2
 
