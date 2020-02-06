@@ -74,9 +74,9 @@ class Network:
             # Train over each minibatch
             for mini_batch in mini_batches:
                 mini_batch_loss_before_BP = self.train_batch(mini_batch, num_classes) 
-                epoch_losses += mini_batch_loss_before_BP
+                epoch_losses += np.sum(mini_batch_loss_before_BP)
             
-            epoch_losses = np.sum(epoch_losses)/n
+            epoch_losses = epoch_losses/n
             print('Epoch {} training complete, loss before training: {}'.format(j, epoch_losses))
         
     def train_batch(self, mini_batch, num_classes):
@@ -92,7 +92,9 @@ class Network:
         for layer in self.layers:
             # Activate and add X to Activation's prev_x, go through Dense
             X = layer.forward(X)
-                
+        # print(Y)
+        # print(X)
+        # input()
         mini_batch_loss_before_BP = self.loss_function.apply_function(Y, X)
 
         # Backpropagation

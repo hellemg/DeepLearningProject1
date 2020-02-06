@@ -94,3 +94,8 @@ class Softmax(Activation):
                 s[:, i]), (1, num_classes, num_classes))
             jacobian_tensor = np.append(jacobian_tensor, jacobian, axis=0)
         return jacobian_tensor
+
+    def backpropagate(self, next_der, debug=False):
+        next_der = np.reshape(next_der, (next_der.shape[0], next_der.shape[1], 1))
+        der = self.gradient(self.prev_x) @ next_der
+        return np.reshape(der(next_der.shape[0], self.prev_x.shape[1]))

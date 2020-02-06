@@ -45,45 +45,38 @@ if __name__ == '__main__':
             config.write(configfile)
 
     elif Menu == 'Arbitrary NN':
-        # Data
-        # print(train_path)
-        # print(dev_path)
+        
         preprocess = Preprocess()
-        # preprocess.get_config_parameters('config.ini')
-        # # # Data
-        # train_path = preprocess.train_path
-        # dev_path = preprocess.dev_path
+        preprocess.get_config_parameters('config.ini')
+        
+        # Data
+        train_path = preprocess.train_path
+        dev_path = preprocess.dev_path
+        X, Y = preprocess.read_dataset(train_path)
+        x_dev, y_dev = preprocess.read_dataset(dev_path)
 
         # Model
-        layers = [0]
-        activations = ['relu']
-        loss_type = 'L2'
-        # layers  = preprocess.layers
-        # activations = preprocess.activations
-        # loss_type = preprocess.loss_type
+        layers  = preprocess.layers
+        activations = preprocess.activations
+        loss_type = preprocess.loss_type
 
         # Hyper
-        learning_rate = 1e-1
-        no_epochs = 1000
-        L2_regularization = 0
-        # learning_rate = preprocess.learning_rate
-        # no_epochs = preprocess.no_epochs
-        # L2_regularization = preprocess.L2_regularization
+        learning_rate = preprocess.learning_rate
+        no_epochs = preprocess.no_epochs
+        L2_regularization = preprocess.L2_regularization
 
         # X from dataset has shape num_examples x num_features
         # Y from dataset has shape num_examples x 1
-        X = np.array([[1, 1],
-                      [1, 0],
-                      [0, 1],
-                      [0, 0]])
-        Y = np.array([1, 0, 0, 0])
-        #X, Y = preprocess.read_dataset(train_path)
+        # X = np.array([[1, 1],
+        #               [1, 0],
+        #               [0, 1],
+        #               [0, 0]])
+        # Y = np.array([1, 0, 0, 0])
 
         # Dev sets
-        x_dev = X.copy()
-        y_dev = Y.copy()
+        # x_dev = X.copy()
+        # y_dev = Y.copy()
 
-        #x_dev, y_dev = preprocess.read_dataset(dev_path)
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
         output_activation = {'L2': preprocess.get_activation('linear'),
@@ -123,13 +116,10 @@ if __name__ == '__main__':
                 # Add activation layer
                 activation = preprocess.get_activation(activations[i])
                 network.add_layer(activation)
-            # Add output dense layer
-            dense = Dense(layers[-1], num_classes)
-            network.add_layer(dense)
-        else:
-            # Add output dense layer
-            dense = Dense(input_dims, num_classes)
-            network.add_layer(dense)
+                input_dims = layer_size
+        # Add output dense layer
+        dense = Dense(input_dims, num_classes)
+        network.add_layer(dense)
         # Add output activation layer
         network.add_layer(output_activation)
 
@@ -137,8 +127,7 @@ if __name__ == '__main__':
         network.compile(learning_rate, preprocess.get_loss_type(loss_type), L2_regularization)
 
         # Train network
-        # print('training data:', training_data)
-        network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=2)
+        network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=64)
         # #print('--- training cost development:', training_cost)
         # #network.print_layers()
         # loss = network.test(dev_data, num_classes)
