@@ -36,3 +36,16 @@ class Dense(Function):
         self.prev_x = x
         z = (x @ self.W) + self.b
         return z
+
+    def print_layer_details(self):
+        print('**',self)
+        print('-input')
+        print(self.prev_x)
+        print('-nabla_W')
+        print(self.nabla_W)
+        print('-nabla_b')
+        print(self.nabla_b)
+        print('-W')
+        print(self.W)
+        print('-b')
+        print(self.b)

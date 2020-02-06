@@ -14,6 +14,11 @@ class Activation(Function):
         self.prev_x = x
         return self.apply_function(x)
 
+    def print_layer_details(self):
+        print('**',self)
+        print('-input')
+        print(self.prev_x)
+
 class ReLU(Activation):
     def __init__(self):
         super().__init__()
