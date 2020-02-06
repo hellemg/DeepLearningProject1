@@ -88,7 +88,7 @@ if __name__ == '__main__':
                       [1, 0],
                       [0, 1],
                       [0, 0]])
-        Y = np.array([0, 1, 1, 0])
+        Y = np.array([1, 1, 1, 0])
         #X, Y = preprocess.read_dataset(train_path)
 
         # Dev sets
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         #x_dev, y_dev = preprocess.read_dataset(dev_path)
 
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': preprocess.get_activation('tanh'),
+        output_activation = {'L2': preprocess.get_activation('linear'),
                              'cross_entropy': preprocess.get_activation('softmax')}[loss_type]
 
         if num_classes > 1:
@@ -130,19 +130,22 @@ if __name__ == '__main__':
                 # Add activation layer
                 activation = preprocess.get_activation(activations[i])
                 network.add_layer(activation)
-        # Add output dense layer
-        dense = Dense(layers[-1], num_classes)
-        network.add_layer(dense)
+            # Add output dense layer
+            dense = Dense(layers[-1], num_classes)
+            network.add_layer(dense)
+        else:
+            # Add output dense layer
+            dense = Dense(input_dims, num_classes)
+            network.add_layer(dense)
         # Add output activatoin layer
         network.add_layer(output_activation)
 
         # Compile network
-        network.compile(learning_rate, preprocess.get_loss_type(loss_type))
+        network.compile(learning_rate, preprocess.get_loss_type(loss_type), L2_regularization)
 
         # Train network
         # print('training data:', training_data)
-        # training_cost = network.train(
-        #     training_data, num_classes, epochs=no_epochs, mini_batch_size=64, lbda=L2_regularization)
+        network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=64)
         # #print('--- training cost development:', training_cost)
         # #network.print_layers()
         # loss = network.test(dev_data, num_classes)

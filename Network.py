@@ -1,6 +1,6 @@
 from Activation import *
 import numpy as np
-
+from Dense import *
 """
 zs: previous layer dotted with incoming weights
 activated_nodes: activation function on zs
@@ -28,7 +28,7 @@ class Network:
         #self.layer_sizes.append(num_nodes)
         #self.activations.append(activation)
 
-    def compile(self, learning_rate, loss_type):
+    def compile(self, learning_rate, loss_type, lbda):
         """
         Sets weights and biases for all layers in network
         Sets learning rate, loss type, number of layers
@@ -36,6 +36,8 @@ class Network:
         #self.initialize_weights_and_biases()
         self.learning_rate = learning_rate
         self.loss_function = loss_type
+        self.lbda = lbda
+        self.print_network()
 
     def print_network(self):
         for layer in self.layers:
@@ -50,13 +52,13 @@ class Network:
 
         :type weights: list of ndarrays, each ndarray is num_nodes x num_nodes_prevlayer
         """
-        np.random.seed(42)
-        self.biases = [np.zeros((y, 1)) for y in self.layer_sizes[1:]]
-        np.random.seed(42)
-        self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
-                                   for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
+        # np.random.seed(42)
+        # self.biases = [np.zeros((y, 1)) for y in self.layer_sizes[1:]]
+        # np.random.seed(42)
+        # self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
+        #                            for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
 
-    def train(self, training_data, num_classes, epochs, mini_batch_size, lbda=0):
+    def train(self, training_data, num_classes, epochs, mini_batch_size):
         """
         Train the network on training_data with batch_size 4, 10 epochs
 
@@ -69,27 +71,26 @@ class Network:
         training_cost = []
         for j in range(epochs):
             # Shuffles the rows of training_data
-            np.random.shuffle(training_data)
+            #np.random.shuffle(training_data)
             # Create minibatches
             mini_batches = [training_data[i:i+mini_batch_size]
                             for i in range(0, n, mini_batch_size)]
             # Train over each minibatch
             for mini_batch in mini_batches:
-                self.train_batch(mini_batch, num_classes,lbda)    
+                self.train_batch(mini_batch, num_classes)    
             
                 # mini_batch_cost = self.backpropagate_batch(
                 #     mini_batch, num_classes, lbda)
                 # # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
                 # training_cost.append(mini_batch_cost)
-            print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
-        return training_cost
+            #print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
 
-    def train_batch(self, mini_batch, num_classes,lbda):
-        # Get X (num_features x num_examples)
-        X = mini_batch[:, :-num_classes].T
-        # Get Y (num_classes x num_examples)
-        Y = mini_batch[:, -num_classes:].T
-        
+    def train_batch(self, mini_batch, num_classes):
+        # Get X (num_ex x input_size)
+        X = mini_batch[:, :-num_classes]
+        # Get Y (num_ex x output_size)
+        Y = mini_batch[:, -num_classes:]
+
         # Forward propagation
         for layer in self.layers:
             # Activate and add X to Activation's prev_x, go through Dense
@@ -101,7 +102,13 @@ class Network:
             # Add nabla_W and nabla_b to Dense, go through Activate
             der = layer.backpropagate(der)
 
-        # TODO: find out where to update weights and biases
+        # Update weights for Dense layers
+        for layer in self.layers:
+            if isinstance(layer, Dense):
+                layer.update_weights(self.learning_rate, self.lbda)
+                layer.update_biases(self.learning_rate)
+
+
 
     def backpropagate_batch(self, mini_batch, num_classes, lbda):
         """

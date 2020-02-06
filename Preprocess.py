@@ -103,7 +103,6 @@ class Preprocess:
 
         :returns: subclass of Activation
         """
-        print('.....',name)
         return {'relu': ReLU(), 'linear': Linear(),
                 'tanh': TanH(), 'softmax': Softmax()}[name]
 
