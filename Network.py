@@ -78,6 +78,8 @@ class Network:
             
             epoch_losses = epoch_losses/n
             print('Epoch {} training complete, loss before training: {}'.format(j, epoch_losses))
+            training_cost.append(epoch_losses)
+        return training_cost
         
     def train_batch(self, mini_batch, num_classes):
         """

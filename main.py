@@ -1,5 +1,6 @@
 import configparser
 import numpy as np
+import matplotlib.pyplot as plt
 
 from Preprocess import *
 from Activation import *
@@ -41,7 +42,7 @@ if __name__ == '__main__':
         config['HYPER'] = {'learning_rate': '1e-2',
                            'no_epochs': '50',
                            'L2_regularization': '0'}
-        with open('config.ini', 'w') as configfile:
+        with open('config_e5.ini', 'w') as configfile:
             config.write(configfile)
 
     elif Menu == 'Arbitrary NN':
@@ -127,9 +128,10 @@ if __name__ == '__main__':
         network.compile(learning_rate, preprocess.get_loss_type(loss_type), L2_regularization)
 
         # Train network
-        network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=64)
-        # #print('--- training cost development:', training_cost)
-        # #network.print_layers()
+        training_cost = network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=64)
+
+        plt.plot(np.arange(1,no_epochs+1), training_cost)
+        plt.show()
         # loss = network.test(dev_data, num_classes)
         # print('-- validation loss:', loss)
 
