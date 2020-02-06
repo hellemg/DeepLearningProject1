@@ -23,10 +23,9 @@ def write_weights_to_file(neural_network, path='somefile.txt'):
 if __name__ == '__main__':
     Menu = {
         -1: 'Testspace',
-        2: 'Create config',
-        3: 'Preprocess',
-        5: 'Arbitrary NN',
-    }[5]
+        1: 'Create config',
+        2: 'Arbitrary NN',
+    }[2]
 
     if Menu == 'Testspace':
         print('Welcome to testspace')
@@ -44,17 +43,6 @@ if __name__ == '__main__':
                            'L2_regularization': '0'}
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
-
-    elif Menu == 'Preprocess':
-        print('Reading config file...')
-        Preprocess = Preprocess()
-        Preprocess.get_config_parameters('config.ini')
-
-        path = './DATA/train_small.csv'
-        x_train, y_train = Preprocess.read_dataset(path)
-        no_examples = len(y_train)
-        no_classes = max(y_train) + 1
-        one_hot = Preprocess.one_hot_encode(no_examples, no_classes, y_train)
 
     elif Menu == 'Arbitrary NN':
         # Data

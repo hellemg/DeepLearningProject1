@@ -60,18 +60,12 @@ class Network:
 
     def train(self, training_data, num_classes, epochs, mini_batch_size):
         """
-        Train the network on training_data with batch_size 4, 10 epochs
-
         :type training_data: ndarray of shape num_examples x num_features+1
         :param training_data: inputs to network horizontally stacked with targets
-
-        :returns: list of training costs for each epoch
         """
         n = len(training_data)
         training_cost = []
         for j in range(epochs):
-            # Shuffles the rows of training_data
-            #np.random.shuffle(training_data)
             # Create minibatches
             mini_batches = [training_data[i:i+mini_batch_size]
                             for i in range(0, n, mini_batch_size)]
@@ -79,10 +73,6 @@ class Network:
             for mini_batch in mini_batches:
                 self.train_batch(mini_batch, num_classes)    
             
-                # mini_batch_cost = self.backpropagate_batch(
-                #     mini_batch, num_classes, lbda)
-                # # mini_batch_cost = self.update_mini_batch(mini_batch, num_classes)
-                # training_cost.append(mini_batch_cost)
             #print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
 
     def train_batch(self, mini_batch, num_classes):
@@ -107,39 +97,6 @@ class Network:
             if isinstance(layer, Dense):
                 layer.update_weights(self.learning_rate, self.lbda)
                 layer.update_biases(self.learning_rate)
-
-
-
-    def backpropagate_batch(self, mini_batch, num_classes, lbda):
-        """
-        Update weights and biases for all layers by applying gradient descent
-        to a mini batch.
-
-        :type mini_batch: ndarray of shape mini_batch_size x num_features+num_classes
-        :param mini_batch: training data to network - inputs horizontally stacked with targets
-
-        :type lbda: number
-        :param lbda: regularization constant
-
-        :returns: average cost for the minibatch
-        """
-        # Get X (num_features x num_examples)
-        X = mini_batch[:, :-num_classes].T
-        # Get Y (num_classes x num_examples)
-        Y = mini_batch[:, -num_classes:].T
-        mini_batch_size = X.shape[1]
-        output_layer = self.forward_propagation(X)
-        loss_by_output_layer = self.loss_function.gradient(Y, output_layer)
-        self.backpropagate_output(
-            loss_by_output_layer, self.num_layers-1, mini_batch_size, lbda)
-        # Return the loss
-        #self.print_layers()
-        # print(self.activated_nodes[-1])
-        # print(Y)
-        # print(self.activated_nodes[-1].shape)
-        # print(Y.shape)
-        # input()
-        return self.loss_function.apply_function(Y, self.activated_nodes[-1])
 
     def backpropagate_output(self, loss_by_output_layer, layer_depth, mini_batch_size, lbda):
         """
@@ -192,98 +149,6 @@ class Network:
         else:
             self.jacobi_iteration(loss_by_output_layer,
                                   layer_depth, mini_batch_size, lbda)
-
-    def jacobi_iteration(self, loss_by_layer, layer_depth, mini_batch_size, lbda):
-        """
-        Updates all weights and biases in the network by Jacobi iteration.
-
-        :type loss_by_layer: ndarray of shape num_classes x mini_batch_size
-        :param loss_by_layer: change of loss in the output as a function of change in a layers nodes(??)
-
-        :type layer_depth: int
-        :param layer_depth: current layer in the network, 0 corresponds to updating first weights
-
-        :type mini_batch_size: int
-        :param mini_batch_size: number of exampes in batch
-
-        :type lbda: float
-        :param lbda: regularization constant
-        """
-        # print('loss by layer', loss_by_layer.shape)
-        # print('going into last weights')
-        # print('layer_depth', layer_depth)
-        # num_classes x num_examples
-        layer_by_sum = self.activations[layer_depth].gradient(
-            self.zs[layer_depth])
-        # print(layer_by_sum.shape)
-        # num_classes x num_examples
-        loss_by_sum = loss_by_layer * layer_by_sum
-        # print(loss_by_sum.shape)
-        # num_classes_prev x num_examples
-        sum_by_weights = self.activated_nodes[layer_depth]
-        # print('sum by weights', sum_by_weights.shape)
-        # num_classes x num_classes_prev
-        loss_by_weights = (
-            (loss_by_sum) @ sum_by_weights.T)/mini_batch_size
-        # print(loss_by_weights.shape)
-        # print(self.weights_transposed[layer_depth].shape)
-        # print(self.biases[layer_depth].shape)
-        # print(np.sum(loss_by_sum, axis=1, keepdims=True).shape)
-        self.weights_transposed[layer_depth] -= self.learning_rate * \
-            (loss_by_weights+lbda)/mini_batch_size
-        self.biases[layer_depth] -= self.learning_rate * \
-            np.sum(loss_by_sum, axis=1, keepdims=True)/mini_batch_size
-        if layer_depth != 0:
-            # print('going into a layer')
-            connecting_weights = self.weights_transposed[layer_depth]
-            # Calculate new loss_by_layer to send into next round
-            loss_by_layer = connecting_weights.T @ loss_by_sum
-            # print('connecting_weights', connecting_weights.shape)
-            # print('loss_by_sum', loss_by_sum.shape)
-            # print('next loss by layer:', loss_by_layer.shape)
-            self.jacobi_iteration(
-                loss_by_layer, layer_depth-1, mini_batch_size, lbda)
-
-    def forward_propagation(self, x):
-        """
-        Complete forward propagation through all layers of the network.
-        Set zs for all layers, except input layer
-        Set activated_nodes for all layers, first activated_nodes is the input layer
-
-        :type x: ndarray of shape num_features x num_examples(=1)
-        :param x: training examples for one minibatch
-
-        :returns: ndarray of shape num_classes x num_examples, output of neural network
-        """
-        activated_node=x
-        # list to store all the activated nodes, layer by layer
-        self.activated_nodes=[x]
-        self.zs=[]  # list to store all the z vectors, layer by layer
-        for i in range(len(self.biases)):
-            weights=self.weights_transposed[i]
-            bias=self.biases[i]
-            z=(weights @ activated_node)+bias
-            self.zs.append(z)
-            activated_node=self.activations[i].apply_function(z)
-            self.activated_nodes.append(activated_node)
-        return activated_node
-
-    def test(self, test_data, num_classes):
-        """
-        Forward propagate x after transpose and get output, check loss
-        :type test_data: ndarray of shape num_examples x num_features+num_labels
-        :param test_data: examples horizontally stacked with labels
-
-        :type num_classes: int
-        :param num_classes: number of output nodes
-        """
-        validation_loss=0
-        # Get X (num_features x num_examples)
-        X = test_data[:, :-num_classes].T
-        # Get Y (num_classes x num_examples)
-        Y = test_data[:, -num_classes:].T
-        Z = self.forward_propagation(X)
-        return self.loss_function.apply_function(Y, Z)
 
     def print_layers(self):
         print('--- input nodes ---')
