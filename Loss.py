@@ -46,7 +46,7 @@ class L2:
 
         :returns: ndarray of shape num_ex x output_size (output_size = 1 for L2)
         """
-        return 1/2*(y - a)**2
+        return 1/2*(a - y)**2
 
     def gradient(self, y, a):
         """
@@ -58,4 +58,4 @@ class L2:
 
         :returns: ndarray of shape num_ex x output_size
         """
-        return y - a
+        return a - y
