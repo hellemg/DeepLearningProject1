@@ -44,7 +44,7 @@ class L2:
         :param a: prediction
         :param y: target
 
-        :returns: ndarray of shape num_ex x 1
+        :returns: ndarray of shape num_ex x output_size (output_size = 1 for L2)
         """
         return 1/2*(y - a)**2
 
