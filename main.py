@@ -78,16 +78,16 @@ if __name__ == '__main__':
         # x_dev = X.copy()
         # y_dev = Y.copy()
 
-
-        num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
-        output_activation = {'L2': preprocess.get_activation('linear'),
-                             'cross_entropy': preprocess.get_activation('softmax')}[loss_type]
+        # Get parameters for output layer
+        num_classes = preprocess.get_num_classes(loss_type, Y)
+        output_activation = preprocess.get_output_actication(loss_type)
 
         # Normalize
         X = X/np.max(X)
-        # TODO: max x_dev or max X?
-        x_dev = x_dev/np.max(x_dev)
+        # TODO: ask if max x_dev or max X?
+        x_dev = x_dev/np.max(X)
 
+        # Preprocess labels and combine data and labels to one array
         if num_classes > 1:
             # One hot encode Y
             Y = preprocess.one_hot_encode(X.shape[0], num_classes, Y)
@@ -97,15 +97,12 @@ if __name__ == '__main__':
             # Make Y a column vector
             Y = Y[:, np.newaxis]
             y_dev = y_dev[:, np.newaxis]
-
         # Combine X and Y
         training_data = np.hstack((X, Y))
         dev_data = np.hstack((x_dev, y_dev))
 
         # Define network
-        # First layer should have size num_features
         network = Network()
-        # Add hidden layers
         num_hidden_layers = len(layers)
         input_dims = X.shape[1]
         if not(num_hidden_layers == 1 and layers[0] == 0):
@@ -130,6 +127,7 @@ if __name__ == '__main__':
         # Train network
         training_cost, dev_cost = network.train(training_data, dev_data, num_classes, epochs=no_epochs, mini_batch_size=64)
 
+        # Plot 
         plt.plot(np.arange(1,no_epochs+1), training_cost, 'r', label='training cost')
         plt.plot(np.arange(1,no_epochs+1), dev_cost, 'b', label='validation cost')
         plt.legend(loc="upper right")

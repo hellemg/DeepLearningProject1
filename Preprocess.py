@@ -42,7 +42,8 @@ class Preprocess:
         # Hyper
         self.learning_rate = float(self.config['HYPER']['learning_rate'])
         self.no_epochs = int(self.config['HYPER']['no_epochs'])
-        self.L2_regularization = float(self.config['HYPER']['L2_regularization'])
+        self.L2_regularization = float(
+            self.config['HYPER']['L2_regularization'])
 
         print('... parameters are set')
 
@@ -116,3 +117,10 @@ class Preprocess:
         :returns: subclass of Loss
         """
         return {'L2': L2(), 'cross_entropy': CrossEntropy()}[name]
+
+    def get_num_classes(self, loss_type, Y):
+        return {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
+
+    def get_output_actication(self, loss_type):
+        return {'L2': self.get_activation('linear'),
+                'cross_entropy': self.get_activation('softmax')}[loss_type]
