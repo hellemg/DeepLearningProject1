@@ -41,7 +41,8 @@ class Network:
 
     def print_network(self):
         for layer in self.layers:
-            print(layer, '->' )
+            print(layer, '->', end=' ')
+        print('')
 
     def initialize_weights_and_biases(self):
         """
@@ -65,17 +66,23 @@ class Network:
         """
         n = len(training_data)
         training_cost = []
+        epoch_losses = 0
         for j in range(epochs):
             # Create minibatches
             mini_batches = [training_data[i:i+mini_batch_size]
                             for i in range(0, n, mini_batch_size)]
             # Train over each minibatch
             for mini_batch in mini_batches:
-                self.train_batch(mini_batch, num_classes)    
+                mini_batch_loss_before_BP = self.train_batch(mini_batch, num_classes) 
+                epoch_losses += mini_batch_loss_before_BP
             
-            #print('Epoch {} training complete, loss: {}'.format(j, mini_batch_cost))
-
+            epoch_losses = np.sum(epoch_losses)/n
+            print('Epoch {} training complete, loss before training: {}'.format(j, epoch_losses))
+        
     def train_batch(self, mini_batch, num_classes):
+        """
+        :returns: ndarray of shape num_ex x 1 - loss for each example
+        """
         # Get X (num_ex x input_size)
         X = mini_batch[:, :-num_classes]
         # Get Y (num_ex x output_size)
@@ -85,18 +92,28 @@ class Network:
         for layer in self.layers:
             # Activate and add X to Activation's prev_x, go through Dense
             X = layer.forward(X)
-        
+                
+        mini_batch_loss_before_BP = self.loss_function.apply_function(Y, X)
+
         # Backpropagation
-        der = self.loss_function.apply_function(Y, X)
+        der = self.loss_function.gradient(Y, X)
         for layer in reversed(self.layers):
             # Add nabla_W and nabla_b to Dense, go through Activate
             der = layer.backpropagate(der)
+        if False:
+            print('out', X)
+            print('Y', Y)
+            print('der', der)
 
+        # ABOVE THIS IS OK
         # Update weights for Dense layers
         for layer in self.layers:
             if isinstance(layer, Dense):
                 layer.update_weights(self.learning_rate, self.lbda)
                 layer.update_biases(self.learning_rate)
+            
+        return mini_batch_loss_before_BP
+        # self.print_layers()
 
     def backpropagate_output(self, loss_by_output_layer, layer_depth, mini_batch_size, lbda):
         """
@@ -151,15 +168,7 @@ class Network:
                                   layer_depth, mini_batch_size, lbda)
 
     def print_layers(self):
-        print('--- input nodes ---')
-        print(self.activated_nodes[0])
-        for i in range(len(self.zs)):
-            print('*** Layer {} ***'.format(i))
-            print('--- weights transposed ---')
-            print(self.weights_transposed[i])
-            print('--- biases ---')
-            print(self.biases[i])
-            print('--- zs ---')
-            print(self.zs[i])
-            print('--- activated nodes ---')
-            print(self.activated_nodes[i+1])
+        print('--- layer_details ---')
+        for layer in self.layers:
+            layer.print_layer_details()
+    

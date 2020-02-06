@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
         # Hyper
         learning_rate = 1e-1
-        no_epochs = 2
+        no_epochs = 1000
         L2_regularization = 0
         # learning_rate = preprocess.learning_rate
         # no_epochs = preprocess.no_epochs
@@ -76,7 +76,7 @@ if __name__ == '__main__':
                       [1, 0],
                       [0, 1],
                       [0, 0]])
-        Y = np.array([1, 1, 1, 0])
+        Y = np.array([1, 0, 0, 0])
         #X, Y = preprocess.read_dataset(train_path)
 
         # Dev sets
@@ -88,6 +88,11 @@ if __name__ == '__main__':
         num_classes = {'L2': 1, 'cross_entropy': 1+Y.max()}[loss_type]
         output_activation = {'L2': preprocess.get_activation('linear'),
                              'cross_entropy': preprocess.get_activation('softmax')}[loss_type]
+
+        # Normalize
+        X = X/np.max(X)
+        # TODO: max x_dev or max X?
+        x_dev = x_dev/np.max(x_dev)
 
         if num_classes > 1:
             # One hot encode Y
@@ -125,7 +130,7 @@ if __name__ == '__main__':
             # Add output dense layer
             dense = Dense(input_dims, num_classes)
             network.add_layer(dense)
-        # Add output activatoin layer
+        # Add output activation layer
         network.add_layer(output_activation)
 
         # Compile network
@@ -133,7 +138,7 @@ if __name__ == '__main__':
 
         # Train network
         # print('training data:', training_data)
-        network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=64)
+        network.train(training_data, num_classes, epochs=no_epochs, mini_batch_size=2)
         # #print('--- training cost development:', training_cost)
         # #network.print_layers()
         # loss = network.test(dev_data, num_classes)

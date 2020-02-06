@@ -5,13 +5,21 @@ class Activation(Function):
     def __init__(self):
         super().__init__()
 
-    def backpropagate(self, next_der):
+    def backpropagate(self, next_der, debug=False):
         # backpropagate partial derivative from next layer 
-        return next_der * self.gradient(self.prev_x)
+        der = next_der * self.gradient(self.prev_x)
+        if debug:
+            print('input der A', next_der)
+            print('prev input A (z)', self.prev_x)
+            print('gradient of prev input A (z)', self.gradient(self.prev_x))
+            print('der', der)
+        return der
 
-    def forward(self, x):
+    def forward(self, x, debug=False):
         # Activate input x (z)
         self.prev_x = x
+        if debug:
+            print('input:', x)
         return self.apply_function(x)
 
     def print_layer_details(self):
