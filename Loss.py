@@ -6,6 +6,7 @@ class Loss:
         pass
 
     def apply_function(self, y, a):
+        # Overwrites the comments in Function
         """
         :type a: ndarray of shape num_x x output_size
         :type y: ndarray of shape num_x x output_size
@@ -18,6 +19,7 @@ class Loss:
         raise NotImplementedError
 
     def gradient(self, y, a):
+        # Overwrites the comments in Function
         """
         :type a: ndarray of shape num_x x output_size
         :type y: ndarray of shape num_x x output_size

@@ -20,20 +20,18 @@ class Function:
         """
         raise NotImplementedError
 
-    def apply_function(self):
+    def apply_function(self, z):
         """
-        TODO: update shapes
-        :type z: ndarray of shape num_nodes x num_ex
+        :type z: ndarray of shape num_ex x input_size
 
-        :returns: ndarray of shape num_nodes x num_ex
+        :returns: ndarray of shape num_ex x output_size (output_size = input_size for Activation)
         """
         raise NotImplementedError
 
-    def gradient(self, values):
+    def gradient(self, z):
         """
-        TODO: update shapes
-        :type z: ndarray of shape num_nodes x num_ex
+        :type z: ndarray of shape num_ex x input_size
 
-        :returns: ndarray of shape num_nodes x num_ex
+        :returns: ndarray of shape num_ex x output_size (output_size = input_size for Activation)
         """
         raise NotImplementedError
