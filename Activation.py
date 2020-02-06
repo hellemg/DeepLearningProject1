@@ -7,9 +7,6 @@ class Activation(Function):
 
     def backpropagate(self, next_der):
         # backpropagate partial derivative from next layer 
-        """
-        :type next_der: ndarray of shape num_features x num_examples
-        """
         return next_der * self.gradient(self.prev_x)
 
     def forward(self, x):

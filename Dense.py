@@ -24,11 +24,6 @@ class Dense(Function):
 
     def backpropagate(self, next_der):
         # backpropagate partial derivative from next layer
-        """
-        :type next_der: ndarray of shape num_ex x output_size
-
-        :returns: ndarray of shape num_ex x input_size (yellow, blue, purple)
-        """
         # take in dL/dz (yellow + blue in textbook). prev_input = a for my cases (or x in first layer)
         self.nabla_W = self.prev_x.T @ next_der
         self.nabla_b = np.sum(next_der, axis=0, keepdims=True)
@@ -38,11 +33,6 @@ class Dense(Function):
 
     def forward(self, x):
         # Calculate z for a dense layer from x (a) from previous layer
-        """
-        :type x: ndarray of shape num_ex x input_size
-
-        :returns: ndarray of shape num_ex x output_size
-        """
         self.prev_x = x
         z = (x @ self.W) + self.b
         return z
