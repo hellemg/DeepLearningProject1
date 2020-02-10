@@ -17,8 +17,9 @@ sys and softmax from scipy.special. Notice that tanh is available from numpy.
 
 def write_weights_to_file(neural_network, path='somefile.txt'):
     with open(path, 'w') as filehandle:
-        for weights in neural_network.weights_transposed:
-            filehandle.write('{}\n'.format(weights))
+        for layer in neural_network.layers:
+            if isinstance(layer, Dense):
+                filehandle.write('{}\n'.format(layer.W))
 
 
 if __name__ == '__main__':
@@ -84,8 +85,7 @@ if __name__ == '__main__':
 
         # Normalize
         X = X/np.max(X)
-        # TODO: ask if max x_dev or max X?
-        x_dev = x_dev/np.max(X)
+        x_dev = x_dev/np.max(x_dev)
 
         # Preprocess labels and combine data and labels to one array
         if num_classes > 1:
@@ -136,4 +136,4 @@ if __name__ == '__main__':
         print(np.argmin(dev_cost))
 
         # Dump weights (transposed) to file
-        # write_weights_to_file(network)
+        write_weights_to_file(network)

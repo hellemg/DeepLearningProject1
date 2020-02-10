@@ -25,8 +25,6 @@ class Network:
         Adds activation object to the list of activations
         """
         self.layers.append(function)
-        # self.layer_sizes.append(num_nodes)
-        # self.activations.append(activation)
 
     def compile(self, learning_rate, loss_type, lbda):
         """
@@ -44,27 +42,13 @@ class Network:
             print(layer, '->', end=' ')
         print('')
 
-    def initialize_weights_and_biases(self):
-        """
-        Sets biases and transposed weights for all layers, except for the first layer
-        which is assumed to be an input layer.
-
-        :type biases: list of ndarrays, each ndarray is num_nodes x 1
-
-        :type weights: list of ndarrays, each ndarray is num_nodes x num_nodes_prevlayer
-        """
-        # np.random.seed(42)
-        # self.biases = [np.zeros((y, 1)) for y in self.layer_sizes[1:]]
-        # np.random.seed(42)
-        # self.weights_transposed = [np.random.normal(0, 1/np.sqrt(y), (y, x))
-        #                            for x, y in zip(self.layer_sizes[:-1], self.layer_sizes[1:])]
-
     def train(self, training_data, dev_data, num_classes, epochs, mini_batch_size):
         """
         :type training_data: ndarray of shape num_examples x num_features+1
         :param training_data: inputs to network horizontally stacked with targets
         """
         n = len(training_data)
+        n_dev = len(dev_data)
         training_cost = []
         dev_cost = []
         for j in range(epochs):
@@ -78,7 +62,7 @@ class Network:
             # Get loss for training data after each training epoch
             train_loss = np.sum(self.get_loss(training_data, num_classes))/n
             # Get loss for dev-set after training
-            dev_loss = np.sum(self.get_loss(dev_data, num_classes))/n
+            dev_loss = np.sum(self.get_loss(dev_data, num_classes))/n_dev
             
             print('Epoch {} training complete, train-loss: {}, validation-loss: {}'.format(
                 j, train_loss, dev_loss))
